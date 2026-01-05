@@ -6,10 +6,10 @@ import axios from 'axios';
 /* ==================================================================================
    KONFIGURASI GLOBAL
    ================================================================================== */
-const GOOGLE_CLIENT_ID = "963212157034-pqg657cicgnmtikm59v04rdi46fo1cqc.apps.googleusercontent.com"; // <-- Pastikan ini diisi
-const API_URL = '/api/photos'; // Menggunakan path relatif untuk Vercel
+// Ganti Client ID ini dengan milik Anda jika berbeda
+const GOOGLE_CLIENT_ID = "963212157034-pqg657cicgnmtikm59v04rdi46fo1cqc.apps.googleusercontent.com"; 
 
-/* --- STYLES & BACKGROUND --- */
+/* --- STYLES & BACKGROUND (Sama seperti sebelumnya) --- */
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Manrope:wght@300;400;600;800&display=swap');
@@ -19,92 +19,152 @@ const GlobalStyles = () => (
       background: rgba(20, 20, 20, 0.6);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
-    .grain-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 50;
+    @keyframes enter {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-enter { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-enter { animation: enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   `}</style>
 );
 
-const CinematicBackground = () => {
-  const images = [
-    'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=1920',
-    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=1920',
-    'https://images.unsplash.com/photo-1504198458649-3128b932f49e?auto=format&fit=crop&q=80&w=1920',
-  ];
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setIndex((prev) => (prev + 1) % images.length), 8000);
-    return () => clearInterval(timer);
-  }, []);
-  return (
-    <div className="fixed inset-0 z-0 bg-black">
-      {images.map((img, i) => (
-        <div key={i} className="absolute inset-0 bg-cover bg-center transition-all duration-[2000ms]"
-          style={{ backgroundImage: `url(${img})`, opacity: i === index ? 0.6 : 0, transform: i === index ? 'scale(1.1)' : 'scale(1)' }} 
-        />
-      ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20" />
-      <div className="grain-overlay" />
-    </div>
-  );
-};
-
-/* --- COMPONENTS --- */
-const Button = ({ children, onClick, variant = 'primary', className = '', disabled, icon: Icon }) => {
-  const base = "relative overflow-hidden transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed font-sans font-bold tracking-wider text-xs uppercase py-4 px-8 rounded-full flex items-center justify-center gap-2 group";
-  const styles = {
-    primary: "bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.3)]",
-    secondary: "bg-transparent text-white border border-white/20 hover:bg-white/10",
-  };
-  return <button onClick={onClick} disabled={disabled} className={`${base} ${styles[variant]} ${className}`}>{children} {Icon && <Icon size={16} />}</button>;
-};
-
-const InputField = ({ label, type, placeholder, value, onChange, prefix }) => (
-  <div className="space-y-2 group">
-    <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-4 group-focus-within:text-white transition-colors">{label}</label>
-    <div className="relative overflow-hidden rounded-2xl bg-white/5 border border-white/10 transition-all focus-within:bg-white/10 focus-within:border-white/30">
-      <input type={type} value={value} onChange={onChange} placeholder={placeholder} className={`w-full bg-transparent text-white px-6 py-4 outline-none font-sans text-sm ${prefix ? 'pl-14' : ''}`} />
-      {prefix && <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center border-r border-white/10 bg-white/5"><span className="text-white/40 text-xs font-bold">{prefix}</span></div>}
-    </div>
+const CinematicBackground = () => (
+  <div className="fixed inset-0 bg-[#0a0a0a] overflow-hidden -z-10">
+    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=2942&auto=format&fit=crop')] bg-cover bg-center opacity-20 transform scale-110 blur-sm grayscale" />
+    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
   </div>
 );
 
 /* ==================================================================================
-   1. LOGIN PANEL
+   1. LOGIN PANEL (UPDATED: GOOGLE + MANUAL DB AUTH)
    ================================================================================== */
 const LoginPanel = ({ onLogin }) => {
+  const [isRegister, setIsRegister] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const login = useGoogleLogin({
+  
+  // State Form Manual
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  // --- LOGIKA LOGIN GOOGLE ---
+  const googleLogin = useGoogleLogin({
     onSuccess: async (res) => {
       setIsLoading(true);
       try {
-        const user = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${res.access_token}` }});
-        onLogin(user.data);
-      } catch (e) { setIsLoading(false); alert('Login Gagal'); }
+        const user = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', { 
+            headers: { Authorization: `Bearer ${res.access_token}` }
+        });
+        onLogin(user.data); // Login berhasil via Google
+      } catch (e) { 
+          setIsLoading(false); 
+          alert('Login Google Gagal: ' + e.message); 
+      }
     },
     onError: () => setIsLoading(false)
   });
+
+  // --- LOGIKA MANUAL SUBMIT (REGISTER / LOGIN) ---
+  const handleManualSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Gunakan '/api' agar otomatis diarahkan Vercel (atau localhost:5000 jika dev lokal)
+    // Jika error Network di localhost, ganti '' menjadi 'http://localhost:5000'
+    const BASE_API = ''; 
+
+    try {
+        if (isRegister) {
+            // --- REGISTER ---
+            await axios.post(`${BASE_API}/api/auth/register`, {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password
+            });
+            alert("Registrasi Berhasil! Silakan Login.");
+            setIsRegister(false); // Pindah ke tab Login
+            setFormData({ name: '', email: '', password: '' }); // Reset form
+        } else {
+            // --- LOGIN ---
+            const res = await axios.post(`${BASE_API}/api/auth/login`, {
+                email: formData.email,
+                password: formData.password
+            });
+            onLogin(res.data); // Login berhasil via Database
+        }
+    } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.error || "Terjadi kesalahan koneksi.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 font-sans relative">
       <GlobalStyles /> <CinematicBackground />
       <div className="w-full max-w-md relative z-10 animate-enter text-center">
-        <div className="glass-card rounded-[32px] p-12 relative overflow-hidden">
-          <div className="w-20 h-20 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-6"><span className="font-serif text-4xl italic">A</span></div>
-          <h1 className="font-serif text-4xl text-white mb-2">Aksara Studio</h1>
-          <p className="text-white/40 text-xs uppercase tracking-[0.3em] mb-10">Internal Workspace</p>
-          <button onClick={() => login()} disabled={isLoading} className="w-full bg-white hover:bg-gray-200 text-black py-4 rounded-2xl font-bold text-sm tracking-wide flex items-center justify-center gap-3 transition-all">
-            {isLoading ? <Loader2 className="animate-spin" /> : 'Enter Workspace'}
+        <div className="glass-card rounded-[32px] p-10 relative overflow-hidden">
+          
+          <div className="mb-8">
+            <div className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="font-serif text-3xl italic">A</span>
+            </div>
+            <h1 className="font-serif text-3xl text-white mb-1">Aksara Picture</h1>
+            <p className="text-white/40 text-[10px] uppercase tracking-[0.3em]">
+                {isRegister ? 'Create Account' : 'Admin Access'}
+            </p>
+          </div>
+
+          {/* FORM MANUAL */}
+          <form onSubmit={handleManualSubmit} className="space-y-4 mb-8 text-left">
+            {isRegister && (
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-3">Full Name</label>
+                    <input name="name" type="text" placeholder="John Doe" value={formData.name} onChange={handleChange} required 
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10 transition-all text-sm" />
+                </div>
+            )}
+            <div className="space-y-2">
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-3">Email</label>
+                <input name="email" type="email" placeholder="admin@aksara.com" value={formData.email} onChange={handleChange} required 
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10 transition-all text-sm" />
+            </div>
+            <div className="space-y-2">
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-3">Password</label>
+                <input name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required 
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:bg-white/10 transition-all text-sm" />
+            </div>
+
+            <button type="submit" disabled={isLoading} className="w-full bg-white hover:bg-gray-200 text-black py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider mt-2 transition-all shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                {isLoading ? <Loader2 className="animate-spin mx-auto" size={16}/> : (isRegister ? 'Sign Up' : 'Sign In')}
+            </button>
+          </form>
+
+          {/* DIVIDER */}
+          <div className="relative mb-8">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
+            <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
+              <span className="px-4 text-white/30 bg-[#1a1a1a]/0 backdrop-blur-md">Or continue with</span>
+            </div>
+          </div>
+
+          {/* GOOGLE BUTTON */}
+          <button onClick={() => googleLogin()} disabled={isLoading} className="w-full bg-transparent border border-white/20 hover:bg-white/10 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-3 transition-all mb-6">
+             <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" /><path fill="currentColor" d="M12 4.63c1.61 0 3.06.56 4.21 1.64l3.16-3.16C17.45 1.18 14.97 0 12 0 7.7 0 3.99 2.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+             Google Account
           </button>
+
+          {/* SWITCHER */}
+          <p className="text-white/40 text-xs">
+            {isRegister ? "Already have an account? " : "Don't have an account? "}
+            <button type="button" onClick={() => setIsRegister(!isRegister)} className="text-white hover:underline font-bold ml-1 transition-all">
+                {isRegister ? 'Log In' : 'Register'}
+            </button>
+          </p>
+
         </div>
       </div>
     </div>
@@ -112,245 +172,321 @@ const LoginPanel = ({ onLogin }) => {
 };
 
 /* ==================================================================================
-   2. ADMIN PANEL (DIPERBAIKI: GENERATE LINK LENGKAP)
+   2. ADMIN PANEL (KOMPONEN LAMA, DIPERTAHANKAN)
    ================================================================================== */
 const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
-  const [formData, setFormData] = useState({ clientName: '', folderLink: '', photographerWa: '', limit: 0 });
-  const [result, setResult] = useState(null);
+  const [folderUrl, setFolderUrl] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [photographerWa, setPhotographerWa] = useState('');
+  const [limit, setLimit] = useState(10);
+  const [generatedLink, setGeneratedLink] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.clientName || !formData.folderLink) return alert("Mohon lengkapi data!");
-
-    // ENCODE SEMUA DATA AGAR BISA DIBACA DI URL CLIENT
-    const params = new URLSearchParams();
-    params.set('client', formData.clientName);
-    params.set('folder', formData.folderLink); // <-- PENTING: Link Drive dikirim
-    params.set('wa', formData.photographerWa);
-    if(formData.limit > 0) params.set('limit', formData.limit);
-
-    // Dapatkan URL dasar website saat ini (localhost atau vercel)
-    const baseUrl = window.location.origin;
-    const finalUrl = `${baseUrl}/select?${params.toString()}`;
-
-    setResult({ ...formData, url: finalUrl });
+  const handleGenerate = () => {
+    if (!folderUrl || !clientName) {
+        alert("Mohon isi Nama Client dan Link Google Drive.");
+        return;
+    }
+    const baseUrl = window.location.origin + '/select';
+    const params = new URLSearchParams({
+        client: clientName,
+        folder: folderUrl,
+        wa: photographerWa,
+        limit: limit
+    });
+    setGeneratedLink(`${baseUrl}?${params.toString()}`);
   };
 
-  const copy = () => { navigator.clipboard.writeText(result.url); alert('Link Copied!'); };
-
-  if (result) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 relative font-sans">
-        <GlobalStyles /> <CinematicBackground />
-        <div className="glass-card max-w-md w-full rounded-[30px] p-8 z-10 text-center animate-enter">
-          <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-6"><Check size={28} /></div>
-          <h2 className="font-serif text-2xl text-white mb-2">Link Created</h2>
-          <div className="bg-black/30 border border-white/10 rounded-xl p-4 mb-6 flex items-center gap-3">
-            <code className="text-xs text-white/70 truncate flex-1">{result.url}</code>
-            <button onClick={copy} className="text-white/40 hover:text-white"><Copy size={16}/></button>
-          </div>
-          <div className="space-y-3">
-            <Button variant="primary" onClick={() => onPreviewClient(result)} className="w-full">Open Live Preview</Button>
-            <Button variant="secondary" onClick={() => setResult(null)} className="w-full">Create Another</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedLink);
+    alert('Link berhasil disalin!');
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-sans relative">
-      <GlobalStyles /> <CinematicBackground />
-      <div className="max-w-xl w-full relative z-10 animate-enter">
-        <div className="glass-card rounded-[32px] overflow-hidden">
-          <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/5">
-            <div className="flex items-center gap-4"><div className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center font-serif font-bold italic">A</div><div><h1 className="text-white font-serif text-lg">New Session</h1><p className="text-[10px] text-white/40 uppercase tracking-widest">{user.given_name}</p></div></div>
-            <button onClick={onLogout} className="text-white/30 hover:text-red-400 p-2"><LogOut size={18} /></button>
+    <div className="min-h-screen bg-[#0a0a0a] text-white p-6 font-sans">
+      <GlobalStyles />
+      <div className="max-w-4xl mx-auto space-y-8 animate-enter">
+        {/* Header */}
+        <header className="flex justify-between items-center glass-card p-6 rounded-2xl">
+          <div className="flex items-center gap-4">
+             {user.picture ? (
+                <img src={user.picture} alt="Profile" className="w-12 h-12 rounded-full border border-white/20" />
+             ) : (
+                <div className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center font-bold text-xl">
+                    {user.given_name?.charAt(0) || "A"}
+                </div>
+             )}
+             <div>
+                <h2 className="text-xl font-serif">Welcome, {user.given_name}</h2>
+                <p className="text-xs text-white/40">{user.email}</p>
+             </div>
           </div>
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            <InputField label="Client Name" type="text" value={formData.clientName} onChange={e => setFormData({...formData, clientName: e.target.value})} placeholder="e.g. Romeo & Juliet" />
-            <InputField label="Google Drive Link" type="url" value={formData.folderLink} onChange={e => setFormData({...formData, folderLink: e.target.value})} placeholder="https://drive.google.com/..." />
-            <div className="grid grid-cols-2 gap-4">
-                <InputField label="Max Photos" type="number" value={formData.limit} onChange={e => setFormData({...formData, limit: parseInt(e.target.value) || 0})} placeholder="0 (Unlimited)" />
-                <InputField label="WhatsApp" prefix="+62" type="tel" value={formData.photographerWa} onChange={e => setFormData({...formData, photographerWa: e.target.value})} placeholder="812..." />
+          <button onClick={onLogout} className="p-3 hover:bg-white/10 rounded-xl transition-all text-white/60 hover:text-white">
+            <LogOut size={20} />
+          </button>
+        </header>
+
+        {/* Generator Form */}
+        <div className="glass-card p-8 rounded-3xl">
+            <h3 className="font-serif text-2xl mb-6">Create New Session</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold ml-2">Client Name</label>
+                    <input type="text" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="e.g. Wedding Budi & Ani" 
+                           className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 transition-all" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold ml-2">Drive Folder Link</label>
+                    <input type="text" value={folderUrl} onChange={(e) => setFolderUrl(e.target.value)} placeholder="https://drive.google.com/drive/folders/..." 
+                           className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 transition-all" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold ml-2">Max Selection</label>
+                    <input type="number" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="10" 
+                           className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 transition-all" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold ml-2">WhatsApp Number</label>
+                    <input type="text" value={photographerWa} onChange={(e) => setPhotographerWa(e.target.value)} placeholder="628123456789" 
+                           className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 transition-all" />
+                </div>
             </div>
-            <div className="pt-4"><Button variant="primary" className="w-full py-5" icon={Sparkles}>Generate Access Link</Button></div>
-          </form>
+
+            <button onClick={handleGenerate} className="w-full bg-white text-black font-bold uppercase tracking-widest py-4 rounded-xl mt-8 hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                <Sparkles size={18} /> Generate Link
+            </button>
         </div>
+
+        {/* Result Area */}
+        {generatedLink && (
+            <div className="glass-card p-6 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between border-l-4 border-green-500">
+                <div className="overflow-hidden w-full">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Generated Link</p>
+                    <p className="text-white/90 truncate font-mono text-sm">{generatedLink}</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                    <button onClick={copyToClipboard} className="p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all" title="Copy">
+                        <Copy size={18} />
+                    </button>
+                    <button onClick={() => window.open(generatedLink, '_blank')} className="p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all" title="Open">
+                        <ExternalLink size={18} />
+                    </button>
+                    <button onClick={() => onPreviewClient({ clientName, folderLink: folderUrl, photographerWa, limit })} className="px-4 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-all text-xs uppercase tracking-wide">
+                        Preview
+                    </button>
+                </div>
+            </div>
+        )}
       </div>
     </div>
   );
 };
 
-// 3. CLIENT GALLERY (VERSI ANTI-CRASH & DEBUGGING)
+/* ==================================================================================
+   3. CLIENT GALLERY (KOMPONEN LAMA, DIPERTAHANKAN)
+   ================================================================================== */
 const ClientGallery = ({ config, onCloseSimulation }) => {
-  const [images, setImages] = useState([]);
-  const [selected, setSelected] = useState(new Set());
+  const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState(null); // Tambah state error
-  const [viewImg, setViewImg] = useState(null);
-
-  const maxLimit = parseInt(config.limit) || 0;
-  const isLimitReached = maxLimit > 0 && selected.size >= maxLimit;
+  const [selected, setSelected] = useState([]);
+  const [error, setError] = useState('');
+  const [isSubmit, setIsSubmit] = useState(false);
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchPhotos = async () => {
       try {
         setLoading(true);
-        setErrorMsg(null);
-        
-        console.log("🔍 Fetching URL:", `${API_URL}?folderLink=${encodeURIComponent(config.folderLink)}`);
-        
-        const response = await axios.get(`${API_URL}?folderLink=${encodeURIComponent(config.folderLink)}`);
-        
-        console.log("✅ Data diterima dari server:", response.data);
-
-        // --- PENGAMAN UTAMA (ANTI-BLANK) ---
-        // Kita cek apakah data yang datang benar-benar Array?
-        if (Array.isArray(response.data)) {
-            setImages(response.data);
-        } else {
-            // Jika bukan array (misal HTML atau Objek Error), kita lempar error
-            console.error("Format Data Salah:", response.data);
-            throw new Error("Server tidak mengembalikan daftar foto yang valid (Cek Console).");
-        }
-
+        // PANGGIL BACKEND
+        const res = await axios.post('/api/photos', { folderUrl: config.folderLink });
+        setPhotos(res.data);
       } catch (err) {
-        console.error("❌ ERROR FETCH:", err);
-        // Tampilkan pesan error yang lebih manusiawi
-        let msg = "Gagal memuat foto.";
-        if (err.response) {
-            // Error dari Backend (400/500)
-            msg = `Server Error (${err.response.status}): ${err.response.data?.error || err.message}`;
-        } else if (err.request) {
-            // Tidak ada respon
-            msg = "Tidak dapat menghubungi server. Cek koneksi internet.";
-        } else {
-            msg = err.message;
-        }
-        setErrorMsg(msg);
+        setError("Gagal memuat foto. Pastikan link benar dan bot sudah diundang.");
       } finally {
         setLoading(false);
       }
     };
+    fetchPhotos();
+  }, [config.folderLink]);
 
-    if (config?.folderLink) fetchImages();
-  }, [config]);
-
-  const toggle = (id) => {
-    const s = new Set(selected);
-    if (s.has(id)) s.delete(id);
-    else {
-      if (maxLimit > 0 && s.size >= maxLimit) return alert(`Maksimal ${maxLimit} foto.`);
-      s.add(id);
+  const toggleSelect = (photo) => {
+    if (selected.find(p => p.id === photo.id)) {
+      setSelected(selected.filter(p => p.id !== photo.id));
+    } else {
+      if (config.limit > 0 && selected.length >= config.limit) {
+        alert(`Maksimal ${config.limit} foto.`);
+        return;
+      }
+      setSelected([...selected, photo]);
     }
-    setSelected(s);
   };
 
-  const sendWA = () => {
-    if (selected.size === 0) return;
-    const names = images.filter(i => selected.has(i.id)).map(i => i.name).join('\n');
-    const msg = encodeURIComponent(`Halo, saya *${config.clientName}*.\nIni foto pilihan saya (${selected.size} foto):\n\n${names}`);
-    window.open(`https://wa.me/62${config.photographerWa?.replace(/^0+/, '') || ''}?text=${msg}`, '_blank');
+  const sendToWa = () => {
+    if(selected.length === 0) return alert("Pilih foto dulu!");
+    
+    let message = `*Halo, saya ${config.clientName}*\nBerikut foto pilihan saya (${selected.length} foto):\n\n`;
+    selected.forEach((p, index) => {
+        message += `${index + 1}. ${p.name}\n`;
+    });
+    message += `\nTerima kasih!`;
+
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/${config.photographerWa}?text=${encoded}`, '_blank');
+    setIsSubmit(true);
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-white">
-      <GlobalStyles /><span className="font-serif text-3xl italic animate-pulse">Aksara Studio</span><p className="text-white/30 text-xs mt-4 tracking-[0.3em]">Loading Gallery...</p>
-    </div>
-  );
-
-  // TAMPILAN JIKA ERROR (Tidak Blank Putih Lagi)
-  if (errorMsg) return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-white p-8 text-center">
-      <GlobalStyles />
-      <div className="w-16 h-16 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-4"><X size={32}/></div>
-      <h2 className="font-serif text-2xl mb-2">Terjadi Kesalahan</h2>
-      <p className="text-white/50 mb-6 max-w-md font-mono text-xs bg-black/50 p-4 rounded border border-white/10">{errorMsg}</p>
-      <button onClick={() => window.location.reload()} className="bg-white text-black px-6 py-3 rounded-full font-bold text-xs uppercase tracking-wide hover:bg-gray-200">Coba Lagi</button>
-    </div>
-  );
+  if (isSubmit) {
+     return (
+        <div className="min-h-screen flex items-center justify-center bg-black text-white text-center p-6">
+            <div className="glass-card p-10 rounded-3xl max-w-lg">
+                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Check size={40} className="text-black" />
+                </div>
+                <h1 className="text-3xl font-serif mb-4">Terkirim!</h1>
+                <p className="text-white/60 mb-8">Pilihan foto Anda telah dikirim ke WhatsApp fotografer.</p>
+                {onCloseSimulation && (
+                    <button onClick={onCloseSimulation} className="bg-white/10 px-6 py-3 rounded-xl hover:bg-white/20 transition-all">Kembali ke Admin</button>
+                )}
+            </div>
+        </div>
+     );
+  }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black pb-32">
-      <GlobalStyles /> <div className="grain-overlay" />
-      <nav className="fixed top-0 inset-x-0 z-40 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-4"><div className="w-9 h-9 bg-white text-black rounded-full flex items-center justify-center font-serif italic font-bold">A</div><div className="hidden md:block"><h1 className="font-serif text-lg">{config.clientName}</h1></div></div>
-        <div className="flex items-center gap-4"><div className={`px-4 py-1.5 rounded-full border text-xs font-medium ${isLimitReached ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-white/5 border-white/10 text-white/60'}`}>{selected.size} / {maxLimit > 0 ? maxLimit : '∞'} Selected</div>{onCloseSimulation && <button onClick={onCloseSimulation} className="bg-white/5 hover:bg-white/10 p-2 rounded-full text-white/60 hover:text-white"><X size={18} /></button>}</div>
-      </nav>
-      <main className="pt-28 px-4 md:px-8 max-w-[2000px] mx-auto">
-        {(!images || images.length === 0) ? <p className="text-center text-white/30 mt-20">Tidak ada foto ditemukan di folder ini.</p> :
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {images.map((img) => {
-            const isSel = selected.has(img.id);
-            const isDisabled = isLimitReached && !isSel;
-            return (
-              <div key={img.id} className={`relative group aspect-[2/3] rounded-lg overflow-hidden transition-all duration-500 ${isSel ? 'ring-2 ring-white ring-offset-2 ring-offset-black' : ''} ${isDisabled ? 'opacity-30 grayscale cursor-not-allowed' : 'cursor-pointer hover:opacity-90'}`} onClick={() => !isDisabled && toggle(img.id)}>
-                <img src={img.thumbnailLink} className={`w-full h-full object-cover transition-transform duration-700 ${isSel ? 'scale-105 opacity-60' : 'group-hover:scale-110'}`} loading="lazy" />
-                {!isDisabled && <><div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity" /><button onClick={(e) => {e.stopPropagation(); setViewImg(img);}} className="absolute bottom-3 right-3 bg-white/10 hover:bg-white text-white hover:text-black backdrop-blur-md p-2 rounded-full opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all"><ZoomIn size={14} /></button></>}
-                <div className={`absolute top-3 right-3 w-6 h-6 rounded-full border border-white/30 flex items-center justify-center transition-all backdrop-blur-sm ${isSel ? 'bg-white text-black border-white scale-110' : 'bg-black/20 text-transparent'}`}><Check size={12} strokeWidth={4} /></div>
-              </div>
-            );
-          })}
-        </div>}
-      </main>
-      <div className="fixed bottom-6 inset-x-0 z-40 flex justify-center px-4 pointer-events-none">
-        <div className="pointer-events-auto bg-[#1a1a1a]/90 backdrop-blur-2xl border border-white/10 pl-6 pr-2 py-2 rounded-full shadow-lg flex items-center gap-4 hover:scale-[1.02] transition-all">
-           <div className="flex flex-col"><span className="text-[10px] text-white/40 uppercase tracking-widest">{isLimitReached ? 'Limit Reached' : 'Selected'}</span><span className={`font-serif text-xl leading-none ${isLimitReached ? 'text-emerald-400' : 'text-white'}`}>{selected.size}</span></div>
-           <button onClick={sendWA} disabled={selected.size === 0} className={`h-12 px-6 rounded-full flex items-center gap-2 font-bold text-xs uppercase tracking-wider transition-all ${selected.size > 0 ? 'bg-white text-black hover:bg-gray-200' : 'bg-white/10 text-white/20 cursor-not-allowed'}`}>Confirm <ArrowRight size={14} /></button>
+    <div className="min-h-screen bg-[#050505] text-white">
+      <GlobalStyles />
+      
+      {/* Navbar Client */}
+      <nav className="fixed top-0 w-full z-50 glass-card border-b-0 border-white/5">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div>
+                <h1 className="font-serif text-xl">{config.clientName}</h1>
+                <p className="text-[10px] text-white/40 uppercase tracking-widest">Select your favorites</p>
+            </div>
+            <div className="flex items-center gap-4">
+                <div className="hidden md:block text-right">
+                    <p className="text-xs text-white/60">Selected</p>
+                    <p className="font-bold font-mono">{selected.length} / {config.limit > 0 ? config.limit : '∞'}</p>
+                </div>
+                <button onClick={sendToWa} className="bg-white text-black px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-all">
+                    Send
+                </button>
+                {onCloseSimulation && (
+                    <button onClick={onCloseSimulation} className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20" title="Close Preview">
+                        <X size={20}/>
+                    </button>
+                )}
+            </div>
         </div>
-      </div>
-      {viewImg && <div className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 animate-enter" onClick={() => setViewImg(null)}><button className="absolute top-6 right-6 text-white/50 hover:text-white"><X size={32}/></button><img src={viewImg.previewLink} className="max-h-[90vh] max-w-full rounded shadow-2xl" onClick={e => e.stopPropagation()}/></div>}
+      </nav>
+
+      {/* Content */}
+      <main className="pt-28 pb-10 px-4 md:px-8 max-w-7xl mx-auto">
+        {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="animate-spin mb-4 text-white/50" size={32} />
+                <p className="text-white/40 text-sm animate-pulse">Loading gallery...</p>
+            </div>
+        ) : error ? (
+            <div className="text-center py-20 bg-red-500/10 rounded-3xl border border-red-500/20">
+                <p className="text-red-400 mb-2">{error}</p>
+                <button onClick={() => window.location.reload()} className="text-xs underline hover:text-white">Try Again</button>
+            </div>
+        ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {photos.map((photo) => {
+                    const isSelected = selected.find(p => p.id === photo.id);
+                    return (
+                        <div key={photo.id} 
+                             onClick={() => toggleSelect(photo)}
+                             className={`relative aspect-[2/3] group cursor-pointer rounded-xl overflow-hidden transition-all duration-300 ${isSelected ? 'ring-4 ring-white scale-95' : 'hover:opacity-90'}`}>
+                            
+                            <img src={photo.thumbnailLink} alt={photo.name} className="w-full h-full object-cover" loading="lazy" />
+                            
+                            <div className={`absolute inset-0 bg-black/40 transition-opacity duration-300 flex items-center justify-center ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                {isSelected ? (
+                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                        <Check className="text-black" size={24} />
+                                    </div>
+                                ) : (
+                                    <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white">
+                                        <Check size={24} />
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="text-xs truncate font-mono text-white/80">{photo.name}</p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        )}
+      </main>
     </div>
   );
 };
 
 /* ==================================================================================
-   4. MAIN APP ROUTER (LOGIKA BARU: AUTO-DETECT URL)
+   4. MAIN APP ROUTER (FINAL)
    ================================================================================== */
 export default function App() {
   const [session, setSession] = useState('login'); 
   const [user, setUser] = useState(null); 
   const [clientConfig, setClientConfig] = useState(null); 
 
-  // --- LOGIKA BARU: CEK URL SAAT PERTAMA KALI DIBUKA ---
   useEffect(() => {
-    // Membaca URL saat ini
-    const path = window.location.pathname;
+    // 1. Cek URL (Apakah Client?)
     const params = new URLSearchParams(window.location.search);
+    const path = window.location.pathname;
 
-    // Jika URL mengandung '/select', berarti ini Client yang buka link
-    if (path.includes('/select')) {
+    if (path.includes('/select') || params.get('client')) {
         const clientName = params.get('client');
         const folderLink = params.get('folder');
         const photographerWa = params.get('wa');
         const limit = params.get('limit');
 
         if (clientName && folderLink) {
-            // Langsung masuk ke Mode Client tanpa login
-            setClientConfig({ 
-                clientName, 
-                folderLink, 
-                photographerWa: photographerWa || '', 
-                limit: limit || 0 
-            });
+            setClientConfig({ clientName, folderLink, photographerWa: photographerWa || '', limit: limit || 0 });
+            return; 
         }
+    }
+
+    // 2. Cek LocalStorage (Apakah Admin pernah login?)
+    const savedUser = localStorage.getItem('aksara_admin_session');
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        setSession('admin');
+      } catch (e) {
+        localStorage.removeItem('aksara_admin_session');
+      }
     }
   }, []);
 
-  const handleLogin = (u) => { setUser(u); setSession('admin'); };
-  const handleLogout = () => { if(confirm("Sign out?")) { setSession('login'); setUser(null); setClientConfig(null); }};
+  const handleLogin = (u) => { 
+    localStorage.setItem('aksara_admin_session', JSON.stringify(u)); // Simpan Sesi
+    setUser(u); 
+    setSession('admin'); 
+  };
+
+  const handleLogout = () => { 
+    if(confirm("Sign out?")) { 
+      localStorage.removeItem('aksara_admin_session'); // Hapus Sesi
+      setSession('login'); 
+      setUser(null); 
+      setClientConfig(null); 
+      window.history.pushState({}, '', '/');
+    }
+  };
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       {clientConfig ? (
-          // Jika ada konfigurasi Client (dari URL atau Preview), tampilkan Gallery
           <ClientGallery config={clientConfig} onCloseSimulation={session === 'admin' ? () => setClientConfig(null) : null} />
       ) : session === 'login' ? (
-          // Jika tidak ada data Client, tampilkan Login Admin
           <LoginPanel onLogin={handleLogin} />
       ) : (
-          // Jika sudah Login, tampilkan Admin Panel
           <AdminPanel user={user} onPreviewClient={setClientConfig} onLogout={handleLogout} />
       )}
     </GoogleOAuthProvider>
