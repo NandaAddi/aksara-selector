@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Check, X, LogOut, Copy, ExternalLink,
-  Loader2, Sparkles, ChevronLeft, ChevronRight, Aperture
+  Loader2, Sparkles, ChevronLeft, ChevronRight, Aperture,
+  User, Folder, Hash, Phone, Link as LinkIcon 
 } from 'lucide-react';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
@@ -43,6 +44,10 @@ const GlobalStyles = () => (
     
     .input-field { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.8rem 1rem; color: white; outline: none; transition: all; }
     .input-field:focus { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
+    
+    /* Hide scrollbar for copy box */
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   `}</style>
 );
 
@@ -136,7 +141,7 @@ const LoginPanel = ({ onLogin }) => {
 };
 
 /* ==================================================================================
-   2. ADMIN PANEL
+   2. ADMIN PANEL (RE-DESIGNED & ORGANIZED)
    ================================================================================== */
 const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
   const [folderUrl, setFolderUrl] = useState('');
@@ -144,45 +149,165 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
   const [photographerWa, setPhotographerWa] = useState('');
   const [limit, setLimit] = useState(10);
   const [generatedLink, setGeneratedLink] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleGenerate = () => {
-    if (!folderUrl || !clientName) return alert("Isi Nama Client & Link Drive.");
+    if (!folderUrl || !clientName) return alert("Mohon isi Nama Client & Link Google Drive.");
     const baseUrl = window.location.origin + '/select';
     const params = new URLSearchParams({ client: clientName, folder: folderUrl, wa: photographerWa, limit: limit });
     setGeneratedLink(`${baseUrl}?${params.toString()}`);
+    setIsCopied(false);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedLink);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
-    <div className="min-h-screen text-white p-4 font-sans animate-fade-up">
-      <div className="max-w-3xl mx-auto space-y-4">
-        <header className="flex justify-between items-center glass-card p-4 rounded-2xl">
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">{user.picture ? <img src={user.picture} alt="Profile" className="w-full h-full object-cover" /> : <div className="bg-white text-black h-full flex items-center justify-center font-bold">{user.given_name?.charAt(0)}</div>}</div>
-             <div><h2 className="text-lg font-serif">{user.given_name}</h2></div>
+    <div className="min-h-screen p-4 font-sans animate-fade-up flex items-center justify-center pb-20">
+      <div className="w-full max-w-2xl space-y-6">
+        
+        {/* --- HEADER: PROFILE --- */}
+        <header className="glass-card p-5 rounded-2xl flex justify-between items-center border border-white/10 bg-white/5">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
+                {user.picture ? (
+                  <img src={user.picture} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="bg-gradient-to-br from-gray-700 to-black text-white h-full flex items-center justify-center font-bold text-lg">
+                    {user.given_name?.charAt(0)}
+                  </div>
+                )}
+             </div>
+             <div>
+               <p className="text-white/40 text-[10px] uppercase tracking-widest font-bold mb-0.5">Logged in as</p>
+               <h2 className="text-xl font-serif text-white">{user.given_name}</h2>
+             </div>
           </div>
-          <button onClick={onLogout} className="p-2.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"><LogOut size={18} /></button>
+          <button 
+            onClick={onLogout} 
+            className="group flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-all active:scale-95 border border-red-500/20"
+          >
+            <span className="text-xs font-bold hidden sm:block">LOGOUT</span>
+            <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+          </button>
         </header>
 
-        <div className="glass-card p-6 rounded-2xl">
-            <h3 className="font-serif text-xl mb-4 flex items-center gap-2"><Aperture size={20}/> New Session</h3>
-            <div className="grid gap-3">
-                <input type="text" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Client Name" className="input-field" />
-                <input type="text" value={folderUrl} onChange={(e) => setFolderUrl(e.target.value)} placeholder="Google Drive Link" className="input-field" />
-                <div className="grid grid-cols-2 gap-3">
-                    <input type="number" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="Max Limit" className="input-field" />
-                    <input type="text" value={photographerWa} onChange={(e) => setPhotographerWa(e.target.value)} placeholder="WhatsApp (628...)" className="input-field" />
+        {/* --- MAIN FORM --- */}
+        <div className="glass-card p-6 md:p-8 rounded-3xl relative overflow-hidden">
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none">
+              <Aperture size={120} className="text-white" />
+            </div>
+
+            <div className="mb-8">
+              <h3 className="font-serif text-2xl text-white mb-1">Create Session</h3>
+              <p className="text-white/40 text-xs">Isi detail sesi foto untuk klien Anda.</p>
+            </div>
+
+            <div className="space-y-5">
+                {/* Client Info Group */}
+                <div className="space-y-4">
+                    <label className="block text-xs font-bold text-white/60 uppercase tracking-wider ml-1">Informasi Utama</label>
+                    
+                    <div className="relative group">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" size={18} />
+                        <input 
+                          type="text" 
+                          value={clientName} 
+                          onChange={(e) => setClientName(e.target.value)} 
+                          placeholder="Nama Klien (Cth: Romeo & Juliet)" 
+                          className="input-field pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
+                        />
+                    </div>
+
+                    <div className="relative group">
+                        <Folder className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-yellow-400 transition-colors" size={18} />
+                        <input 
+                          type="text" 
+                          value={folderUrl} 
+                          onChange={(e) => setFolderUrl(e.target.value)} 
+                          placeholder="Link Google Drive Folder" 
+                          className="input-field pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
+                        />
+                    </div>
+                </div>
+
+                {/* Settings Group */}
+                <div className="space-y-4 pt-2">
+                    <label className="block text-xs font-bold text-white/60 uppercase tracking-wider ml-1">Pengaturan Batasan</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="relative group">
+                            <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" size={18} />
+                            <input 
+                              type="number" 
+                              value={limit} 
+                              onChange={(e) => setLimit(e.target.value)} 
+                              placeholder="Max Foto (Default: 10)" 
+                              className="input-field pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
+                            />
+                        </div>
+                        <div className="relative group">
+                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-green-400 transition-colors" size={18} />
+                            <input 
+                              type="text" 
+                              value={photographerWa} 
+                              onChange={(e) => setPhotographerWa(e.target.value)} 
+                              placeholder="WhatsApp (62812...)" 
+                              className="input-field pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button onClick={handleGenerate} className="w-full bg-white text-black font-bold uppercase tracking-widest py-3.5 rounded-xl mt-6 hover:bg-gray-200 transition-transform active:scale-95 flex items-center justify-center gap-2"><Sparkles size={16} /> Generate Link</button>
+
+            <button 
+              onClick={handleGenerate} 
+              className="w-full bg-white text-black font-bold uppercase tracking-[0.2em] py-4 rounded-xl mt-8 hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+            >
+              <Sparkles size={18} /> Generate Link
+            </button>
         </div>
 
+        {/* --- RESULT SECTION --- */}
         {generatedLink && (
-            <div className="glass-card p-4 rounded-xl flex flex-col gap-3">
-                <div className="bg-black/40 p-3 rounded text-xs text-white/70 break-all font-mono">{generatedLink}</div>
-                <div className="flex gap-2">
-                    <button onClick={() => { navigator.clipboard.writeText(generatedLink); alert('Copied!'); }} className="p-2 bg-white/10 rounded hover:bg-white/20"><Copy size={16} /></button>
-                    <button onClick={() => window.open(generatedLink, '_blank')} className="p-2 bg-white/10 rounded hover:bg-white/20"><ExternalLink size={16} /></button>
-                    <button onClick={() => onPreviewClient({ clientName, folderLink: folderUrl, photographerWa, limit })} className="flex-1 bg-white text-black font-bold rounded-lg text-xs uppercase hover:bg-gray-200">Preview Gallery</button>
+            <div className="glass-card p-1 rounded-2xl animate-fade-up border border-yellow-400/30 shadow-[0_0_30px_rgba(253,224,71,0.1)]">
+                <div className="bg-black/40 p-5 rounded-xl">
+                    <div className="flex items-center gap-2 mb-4 text-yellow-400">
+                        <LinkIcon size={16} />
+                        <span className="text-xs font-bold uppercase tracking-widest">Link Created Successfully</span>
+                    </div>
+
+                    {/* Copy Box */}
+                    <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2 mb-4">
+                        <div className="flex-1 overflow-x-auto scrollbar-hide">
+                           <p className="text-white/70 text-sm font-mono whitespace-nowrap px-2">{generatedLink}</p>
+                        </div>
+                        <button 
+                          onClick={copyToClipboard} 
+                          className={`p-2 rounded-md transition-all ${isCopied ? 'bg-green-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                        >
+                           {isCopied ? <Check size={18} /> : <Copy size={18} />}
+                        </button>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <button 
+                          onClick={() => window.open(generatedLink, '_blank')} 
+                          className="flex items-center justify-center gap-2 p-3 rounded-lg border border-white/10 hover:bg-white/5 text-white/80 transition-colors text-xs uppercase font-bold tracking-wide"
+                        >
+                           <ExternalLink size={14} /> Open Link
+                        </button>
+                        <button 
+                          onClick={() => onPreviewClient({ clientName, folderLink: folderUrl, photographerWa, limit })} 
+                          className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors text-xs uppercase font-bold tracking-wide"
+                        >
+                           Preview Gallery <ChevronRight size={14} />
+                        </button>
+                    </div>
                 </div>
             </div>
         )}
