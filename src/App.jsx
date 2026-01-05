@@ -12,9 +12,10 @@ import axios from 'axios';
 const GOOGLE_CLIENT_ID = "963212157034-pqg657cicgnmtikm59v04rdi46fo1cqc.apps.googleusercontent.com"; 
 
 const BG_IMAGES = [
-  "https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/4.jpg", // Wedding/Love
-  "https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/5.jpg", // Moody Black White
-  "https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/6.jpg", // Nature/Light
+  "https://images.unsplash.com/photo-1519741497674-611481863552?q=60&w=1000&auto=format&fit=crop", 
+  "https://images.unsplash.com/photo-1511285560982-1356c11d4606?q=60&w=1000&auto=format&fit=crop", 
+  "https://images.unsplash.com/photo-1472653431158-6364773b2a56?q=60&w=1000&auto=format&fit=crop", 
+  "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=60&w=1000&auto=format&fit=crop"  
 ];
 
 /* ==================================================================================
@@ -35,16 +36,12 @@ const GlobalStyles = () => (
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     }
 
-    /* Animasi */
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     .animate-fade-up { animation: fadeInUp 0.6s ease-out forwards; }
-    .animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     
-    /* Utility */
+    /* UTILS: Mencegah scroll saat lightbox aktif */
     .lightbox-open { overflow: hidden !important; height: 100vh !important; touch-action: none; }
     
-    /* Input Style */
     .input-field { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.8rem 1rem; color: white; outline: none; transition: all; }
     .input-field:focus { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
   `}</style>
@@ -71,26 +68,15 @@ const BackgroundSlideshow = () => {
   );
 };
 
-// --- PRELOADER DENGAN LOGO ---
-// Ganti src={logoImage} jika pakai import file, atau string URL jika pakai link
 const Preloader = () => (
   <div className="fixed inset-0 z-[999] bg-[#050505] flex items-center justify-center">
     <div className="flex flex-col items-center animate-pulse">
-       {/* Container Lingkaran Loading */}
        <div className="w-20 h-20 border border-white/10 rounded-full flex items-center justify-center mb-4 relative">
-          
-          {/* Garis Loading Berputar */}
           <div className="absolute inset-0 border-t border-white rounded-full animate-spin"></div>
-          
-          <img 
-            src="https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/src/icon.png" 
-            alt="Logo" 
-            className="w-10 h-10 object-contain" 
-          />
-          {/* --------------------------------------- */}
-
+          {/* GANTI LOGO ANDA DISINI (img src="...") atau biarkan text A */}
+          <span className="font-serif text-3xl text-white italic">A</span>
        </div>
-       <p className="text-white/50 text-[10px] uppercase tracking-[0.3em] font-sans">Loading...</p>
+       <p className="text-white/50 text-[10px] uppercase tracking-[0.3em] font-sans">Loading Gallery...</p>
     </div>
   </div>
 );
@@ -102,7 +88,6 @@ const LoginPanel = ({ onLogin }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const googleLogin = useGoogleLogin({
@@ -131,9 +116,7 @@ const LoginPanel = ({ onLogin }) => {
       <div className="w-full max-w-sm relative z-10 animate-fade-up">
         <div className="glass-card rounded-[2rem] p-8 relative overflow-hidden">
           <div className="mb-6 text-center">
-            <div className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                <span className="font-serif text-2xl italic">A</span>
-            </div>
+            <div className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_rgba(255,255,255,0.2)]"><span className="font-serif text-2xl italic">A</span></div>
             <h1 className="font-serif text-2xl text-white">Aksara Picture</h1>
             <p className="text-white/40 text-[9px] uppercase tracking-[0.2em]">{isRegister ? 'Create Account' : 'Welcome Back'}</p>
           </div>
@@ -141,18 +124,11 @@ const LoginPanel = ({ onLogin }) => {
             {isRegister && <input name="name" type="text" placeholder="Full Name" value={formData.name} onChange={handleChange} required className="input-field" />}
             <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="input-field" />
             <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required className="input-field" />
-            <button type="submit" disabled={isLoading} className="w-full bg-white hover:bg-gray-200 text-black py-3 rounded-xl font-bold text-xs uppercase tracking-wider mt-2 shadow-lg active:scale-95 transition-transform">
-                {isLoading ? <Loader2 className="animate-spin mx-auto" size={16}/> : (isRegister ? 'Sign Up' : 'Sign In')}
-            </button>
+            <button type="submit" disabled={isLoading} className="w-full bg-white hover:bg-gray-200 text-black py-3 rounded-xl font-bold text-xs uppercase tracking-wider mt-2 shadow-lg active:scale-95 transition-transform">{isLoading ? <Loader2 className="animate-spin mx-auto" size={16}/> : (isRegister ? 'Sign Up' : 'Sign In')}</button>
           </form>
-          <div className="relative mb-5">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-            <div className="relative flex justify-center"><span className="px-3 text-[9px] uppercase text-white/30 bg-black/20 backdrop-blur-md rounded">Or</span></div>
-          </div>
+          <div className="relative mb-5"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div><div className="relative flex justify-center"><span className="px-3 text-[9px] uppercase text-white/30 bg-black/20 backdrop-blur-md rounded">Or</span></div></div>
           <button onClick={() => googleLogin()} disabled={isLoading} className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wide mb-4 transition-colors">Google Access</button>
-          <p className="text-white/40 text-xs text-center cursor-pointer hover:text-white transition-colors" onClick={() => setIsRegister(!isRegister)}>
-            {isRegister ? "Have an account? Log In" : "New here? Register"}
-          </p>
+          <p className="text-white/40 text-xs text-center cursor-pointer hover:text-white transition-colors" onClick={() => setIsRegister(!isRegister)}>{isRegister ? "Have an account? Log In" : "New here? Register"}</p>
         </div>
       </div>
     </div>
@@ -181,9 +157,7 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
       <div className="max-w-3xl mx-auto space-y-4">
         <header className="flex justify-between items-center glass-card p-4 rounded-2xl">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
-                {user.picture ? <img src={user.picture} alt="Profile" className="w-full h-full object-cover" /> : <div className="bg-white text-black h-full flex items-center justify-center font-bold">{user.given_name?.charAt(0)}</div>}
-             </div>
+             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">{user.picture ? <img src={user.picture} alt="Profile" className="w-full h-full object-cover" /> : <div className="bg-white text-black h-full flex items-center justify-center font-bold">{user.given_name?.charAt(0)}</div>}</div>
              <div><h2 className="text-lg font-serif">{user.given_name}</h2></div>
           </div>
           <button onClick={onLogout} className="p-2.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"><LogOut size={18} /></button>
@@ -199,13 +173,11 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
                     <input type="text" value={photographerWa} onChange={(e) => setPhotographerWa(e.target.value)} placeholder="WhatsApp (628...)" className="input-field" />
                 </div>
             </div>
-            <button onClick={handleGenerate} className="w-full bg-white text-black font-bold uppercase tracking-widest py-3.5 rounded-xl mt-6 hover:bg-gray-200 transition-transform active:scale-95 flex items-center justify-center gap-2">
-                <Sparkles size={16} /> Generate Link
-            </button>
+            <button onClick={handleGenerate} className="w-full bg-white text-black font-bold uppercase tracking-widest py-3.5 rounded-xl mt-6 hover:bg-gray-200 transition-transform active:scale-95 flex items-center justify-center gap-2"><Sparkles size={16} /> Generate Link</button>
         </div>
 
         {generatedLink && (
-            <div className="glass-card p-4 rounded-xl flex flex-col gap-3 animate-scale-in">
+            <div className="glass-card p-4 rounded-xl flex flex-col gap-3">
                 <div className="bg-black/40 p-3 rounded text-xs text-white/70 break-all font-mono">{generatedLink}</div>
                 <div className="flex gap-2">
                     <button onClick={() => { navigator.clipboard.writeText(generatedLink); alert('Copied!'); }} className="p-2 bg-white/10 rounded hover:bg-white/20"><Copy size={16} /></button>
@@ -220,7 +192,7 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
 };
 
 /* ==================================================================================
-   3. CLIENT GALLERY (FIXED MOBILE LAYOUT & NAV BUTTONS)
+   3. CLIENT GALLERY (FIXED: IMAGE CENTERING & MOBILE HEIGHT)
    ================================================================================== */
 const ClientGallery = ({ config, onCloseSimulation }) => {
   const [photos, setPhotos] = useState([]);
@@ -228,14 +200,14 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
   const [selected, setSelected] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   
-  // 1. KUNCI SCROLL BODY KETIKA LIGHTBOX BUKA
+  // LOCK SCROLL
   useEffect(() => {
     if (lightboxIndex !== null) document.body.classList.add('lightbox-open');
     else document.body.classList.remove('lightbox-open');
     return () => document.body.classList.remove('lightbox-open');
   }, [lightboxIndex]);
 
-  // 2. NAVIGASI KEYBOARD
+  // KEYBOARD NAV
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (lightboxIndex === null) return;
@@ -247,7 +219,7 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightboxIndex]);
 
-  // 3. FETCH & OPTIMASI URL
+  // FETCH
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
@@ -257,8 +229,8 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
             const baseUrl = p.thumbnailLink || '';
             return {
                 ...p,
-                gridUrl: baseUrl.replace(/=s\d+/, '=s300-c'), // Kecil & Kotak untuk Grid
-                fullUrl: baseUrl.replace(/=s\d+/, '=s1200') // HD Ringan untuk Lightbox
+                gridUrl: baseUrl.replace(/=s\d+/, '=s300-c'), 
+                fullUrl: baseUrl.replace(/=s\d+/, '=s1200') 
             };
         });
         setPhotos(optimizedPhotos);
@@ -289,24 +261,20 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
   
   return (
     <div className="min-h-screen text-white pb-20">
-      {/* Navbar Fixed */}
+      {/* Navbar */}
       <nav className="fixed top-0 w-full z-40 glass-card border-b border-white/5 h-16 flex items-center justify-between px-4">
           <div className="flex flex-col">
               <h1 className="font-serif text-lg leading-tight truncate max-w-[150px]">{config.clientName}</h1>
               <p className="text-[9px] text-white/50 uppercase tracking-widest">Selection</p>
           </div>
           <div className="flex items-center gap-3">
-              <div className="bg-white/10 px-3 py-1 rounded-full text-xs font-mono text-yellow-400 border border-white/10">
-                  {selected.length}/{config.limit || '∞'}
-              </div>
-              <button onClick={sendToWa} className="bg-white text-black px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-gray-200 active:scale-95 transition-transform">
-                  Send
-              </button>
+              <div className="bg-white/10 px-3 py-1 rounded-full text-xs font-mono text-yellow-400 border border-white/10">{selected.length}/{config.limit || '∞'}</div>
+              <button onClick={sendToWa} className="bg-white text-black px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-gray-200 active:scale-95 transition-transform">Send</button>
               {onCloseSimulation && <button onClick={onCloseSimulation} className="p-2 bg-red-500/10 text-red-500 rounded-lg"><X size={16}/></button>}
           </div>
       </nav>
 
-      {/* Grid Gallery */}
+      {/* Grid */}
       <main className="pt-20 px-2 max-w-7xl mx-auto animate-fade-up">
         {loading ? (
             <div className="flex flex-col items-center justify-center py-40">
@@ -332,54 +300,46 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
         )}
       </main>
 
-      {/* --- LIGHTBOX (PERBAIKAN TOTAL MOBILE LAYOUT) --- */}
+      {/* --- LIGHTBOX SYSTEM (PERBAIKAN TOTAL) --- */}
       {lightboxIndex !== null && photos[lightboxIndex] && (
         <div 
-          className="fixed inset-0 z-[9999] bg-black flex flex-col h-[100dvh] w-full"
-          onClick={() => setLightboxIndex(null)} // Klik background untuk close
+          className="fixed inset-0 z-[9999] bg-black flex flex-col w-full h-[100dvh]" /* 100dvh PENTING untuk Mobile */
+          onClick={() => setLightboxIndex(null)}
         >
             
-            {/* 1. Header (Fixed Height, Don't Shrink) */}
+            {/* Header (Fixed) */}
             <div className="h-16 flex-none flex items-center justify-between px-4 bg-black/50 backdrop-blur-sm z-50">
                 <span className="text-white/70 text-xs font-mono truncate max-w-[200px]">{photos[lightboxIndex].name}</span>
                 <button onClick={() => setLightboxIndex(null)} className="p-3 bg-white/10 rounded-full text-white active:bg-white/20"><X size={20}/></button>
             </div>
 
-            {/* 2. Main Image Area (Flex-1 fills remaining space) */}
-            <div className="flex-1 relative w-full h-full flex items-center justify-center overflow-hidden bg-black">
+            {/* AREA GAMBAR UTAMA (CENTERING SYSTEM) */}
+            {/* flex-1 akan mengambil semua sisa ruang antara header dan footer */}
+            <div className="flex-1 w-full relative flex items-center justify-center overflow-hidden bg-black" onClick={(e) => e.stopPropagation()}>
                 
-                {/* Tombol Navigasi (ABSOLUTE POSITIONED RELATIVE TO SCREEN, NOT IMAGE) */}
-                {/* Layer z-50 agar di atas gambar. Padding p-4 agar area sentuh besar. */}
-                <button 
-                    onClick={prevImage} 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 p-4 md:p-6 text-white/80 hover:text-white z-50 outline-none" 
-                    style={{touchAction: 'manipulation'}} // Optimasi touch
-                >
-                    <ChevronLeft size={40} className="drop-shadow-lg filter bg-black/20 rounded-full" />
+                {/* Tombol Kiri */}
+                <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 p-4 text-white/80 hover:text-white bg-black/20 hover:bg-black/50 rounded-full z-[60] outline-none touch-manipulation">
+                    <ChevronLeft size={36} />
                 </button>
 
-                <button 
-                    onClick={nextImage} 
-                    className="absolute right-0 top-1/2 -translate-y-1/2 p-4 md:p-6 text-white/80 hover:text-white z-50 outline-none"
-                    style={{touchAction: 'manipulation'}}
-                >
-                    <ChevronRight size={40} className="drop-shadow-lg filter bg-black/20 rounded-full" />
+                {/* Tombol Kanan */}
+                <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 p-4 text-white/80 hover:text-white bg-black/20 hover:bg-black/50 rounded-full z-[60] outline-none touch-manipulation">
+                    <ChevronRight size={36} />
                 </button>
 
-                {/* Gambar (Responsif Penuh) */}
+                {/* GAMBAR */}
+                {/* max-h-full dan object-contain memastikan gambar tidak pernah 'keluar' atau terpotong */}
                 <img 
                     src={photos[lightboxIndex].fullUrl} 
-                    className="max-w-full max-h-full object-contain pointer-events-none select-none" // pointer-events-none supaya klik gambar tembus ke background (opsional) atau matikan drag
+                    className="max-w-full max-h-full object-contain pointer-events-none select-none" 
                     alt="Full View"
-                    style={{ maxHeight: '100%', maxWidth: '100%' }}
-                    onClick={(e) => e.stopPropagation()} // Supaya kalau klik gambar gak close (opsional, kalau mau close pas klik gambar hapus baris ini)
                 />
             </div>
 
-            {/* 3. Footer Action (Fixed Height, Don't Shrink) */}
-            <div className="h-24 flex-none flex items-center justify-center bg-gradient-to-t from-black via-black/80 to-transparent z-50 pb-4" onClick={(e) => e.stopPropagation()}>
+            {/* Footer Action (Fixed) */}
+            <div className="h-24 flex-none flex items-center justify-center bg-gradient-to-t from-black via-black/80 to-transparent z-50 pb-6" onClick={(e) => e.stopPropagation()}>
                  <button onClick={(e) => toggleSelect(photos[lightboxIndex], e)}
-                    className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold transition-all shadow-lg active:scale-95 ${selected.find(p => p.id === photos[lightboxIndex].id) ? 'bg-yellow-400 text-black' : 'bg-white/20 text-white border border-white/20 backdrop-blur-md'}`}>
+                    className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold transition-all shadow-lg active:scale-95 ${selected.find(p => p.id === photos[lightboxIndex].id) ? 'bg-yellow-400 text-black' : 'bg-white/20 text-white border border-white/20 backdrop-blur-md'}`}>
                     {selected.find(p => p.id === photos[lightboxIndex].id) ? <><Check size={18} strokeWidth={3} /> Selected</> : 'Select Photo'}
                 </button>
             </div>
