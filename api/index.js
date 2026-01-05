@@ -14,23 +14,130 @@ app.use(cors({
 
 app.use(express.json());
 
-// --- DATABASE SETUP ---
+/* ==================================================================================
+   1. DATABASE SETUP (OPTIMIZED FOR SERVERLESS/VERCEL)
+   ================================================================================== */
 const MONGODB_URI = process.env.MONGODB_URI;
-if (MONGODB_URI) {
-  mongoose.connect(MONGODB_URI).catch(err => console.error("MongoDB Error:", err));
+
+// Menggunakan Global Cache agar koneksi tidak putus-nyambung terus menerus
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
+
+async function connectToDatabase() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!MONGODB_URI) {
+    throw new Error('⚠️ MONGODB_URI tidak ditemukan di Environment Variables Vercel!');
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log("✅ Terhubung ke MongoDB");
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
+}
+
+// --- MODEL USER ---
 const UserSchema = new mongoose.Schema({
-  name: String, email: String, password: String
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
 });
+
+// Cek models agar tidak error saat hot-reload
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
-// --- AUTH ROUTE (Login/Register) ---
-app.post('/api/auth/register', async (req, res) => { /* ... kode sama ... */ });
-app.post('/api/auth/login', async (req, res) => { /* ... kode sama ... */ });
+/* ==================================================================================
+   2. AUTH ROUTE (LOGIN & REGISTER)
+   ================================================================================== */
 
-// --- GOOGLE DRIVE SETUP (UPDATED DEBUGGING) ---
+// REGISTER
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    await connectToDatabase(); // <--- Wajib connect dulu
+
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+        return res.status(400).json({ error: 'Semua kolom wajib diisi!' });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(400).json({ error: 'Email sudah terdaftar!' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ name, email, password: hashedPassword });
+
+    res.status(201).json({ 
+        message: 'Registrasi berhasil!', 
+        user: { name: newUser.name, email: newUser.email } 
+    });
+
+  } catch (error) {
+    console.error("Register Error:", error);
+    res.status(500).json({ error: `Gagal Register: ${error.message}` });
+  }
+});
+
+// LOGIN
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    await connectToDatabase(); // <--- Wajib connect dulu
+
+    const { email, password } = req.body;
+    
+    // Cari user
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(400).json({ error: 'Email tidak ditemukan!' });
+    }
+
+    // Cek password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        return res.status(400).json({ error: 'Password salah!' });
+    }
+
+    // Kirim data user
+    res.json({ 
+        id: user._id, 
+        given_name: user.name, 
+        email: user.email, 
+        picture: null 
+    });
+
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).json({ error: `Gagal Login: ${error.message}` });
+  }
+});
+
+/* ==================================================================================
+   3. GOOGLE DRIVE SETUP (UPDATED DEBUGGING)
+   ================================================================================== */
 const getAuth = () => {
-    // 1. Cek Environment Variable (Prioritas Vercel)
+    // Cek Environment Variable
     if (process.env.GOOGLE_CREDENTIALS) {
         try {
             const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
@@ -51,7 +158,7 @@ const getFolderIdFromUrl = (url) => {
   return match ? match[0] : null;
 };
 
-// --- API PHOTOS (UPDATED DEBUGGING) ---
+// API PHOTOS
 app.post('/api/photos', async (req, res) => {
   try {
     const { folderUrl } = req.body;
@@ -73,7 +180,7 @@ app.post('/api/photos', async (req, res) => {
     
     const service = google.drive({ version: 'v3', auth });
     
-    // Coba Fetch Data
+    // Fetch Data (Looping)
     let allFiles = [];
     let pageToken = null;
     let loopCount = 0;
@@ -105,19 +212,17 @@ app.post('/api/photos', async (req, res) => {
     res.json(allFiles);
 
   } catch (error) {
-    // TANGKAP ERROR DAN KIRIM KE FRONTEND
     console.error("API Crash:", error);
     
-    // Cek error permission
     if (error.message && error.message.includes('permissions')) {
         return res.status(500).json({ error: "Bot email belum dijadikan Viewer di folder Drive ini." });
     }
 
-    // Kirim pesan error asli biar ketahuan sebabnya
     res.status(500).json({ error: `Server Error: ${error.message}` });
   }
 });
 
 app.get('/api', (req, res) => res.send("Aksara API Ready"));
 
+// WAJIB EXPORT DEFAULT UNTUK VERCEL
 export default app;
