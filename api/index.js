@@ -1,60 +1,123 @@
-// ... (Bagian atas kode import dan setup server biarkan sama) ...
+import express from 'express';
+import cors from 'cors';
+import { google } from 'googleapis';
+import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 
-// Endpoint Photos (DIOPTIMALKAN)
+const app = express();
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
+
+// --- DATABASE SETUP ---
+const MONGODB_URI = process.env.MONGODB_URI;
+if (MONGODB_URI) {
+  mongoose.connect(MONGODB_URI).catch(err => console.error("MongoDB Error:", err));
+}
+const UserSchema = new mongoose.Schema({
+  name: String, email: String, password: String
+});
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
+
+// --- AUTH ROUTE (Login/Register) ---
+app.post('/api/auth/register', async (req, res) => { /* ... kode sama ... */ });
+app.post('/api/auth/login', async (req, res) => { /* ... kode sama ... */ });
+
+// --- GOOGLE DRIVE SETUP (UPDATED DEBUGGING) ---
+const getAuth = () => {
+    // 1. Cek Environment Variable (Prioritas Vercel)
+    if (process.env.GOOGLE_CREDENTIALS) {
+        try {
+            const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+            return new google.auth.GoogleAuth({
+                credentials,
+                scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+            });
+        } catch (e) {
+            throw new Error("Format GOOGLE_CREDENTIALS di Vercel Settings salah (Bukan JSON valid).");
+        }
+    }
+    throw new Error("Environment Variable 'GOOGLE_CREDENTIALS' tidak ditemukan di Vercel.");
+};
+
+const getFolderIdFromUrl = (url) => {
+  if (!url) return null;
+  const match = url.match(/[-\w]{25,}/);
+  return match ? match[0] : null;
+};
+
+// --- API PHOTOS (UPDATED DEBUGGING) ---
 app.post('/api/photos', async (req, res) => {
-  const { folderUrl } = req.body;
-  const folderId = getFolderIdFromUrl(folderUrl);
-
-  if (!folderId) return res.status(400).json({ error: 'Link folder tidak valid' });
-
   try {
-    const auth = getAuth();
-    if (!auth) throw new Error("Credential Google tidak ditemukan di Server.");
+    const { folderUrl } = req.body;
+    
+    // Validasi Folder ID
+    const folderId = getFolderIdFromUrl(folderUrl);
+    if (!folderId) {
+        return res.status(400).json({ error: 'Link Google Drive tidak valid.' });
+    }
+
+    // Validasi Auth
+    let auth;
+    try {
+        auth = getAuth();
+    } catch (authError) {
+        console.error("Auth Error:", authError.message);
+        return res.status(500).json({ error: authError.message }); 
+    }
     
     const service = google.drive({ version: 'v3', auth });
     
+    // Coba Fetch Data
     let allFiles = [];
     let pageToken = null;
     let loopCount = 0;
 
-    // LOOPING PENGAMBILAN DATA
     do {
-      // Safety break: Cegah looping tak terbatas jika data ribuan (Vercel limit 10s)
       if (loopCount > 5) break; 
-
+      
       const response = await service.files.list({
         q: `'${folderId}' in parents and (mimeType contains 'image/') and trashed = false`,
-        // OPTIMASI 1: Ambil hanya field yang perlu saja (id, name, thumbnailLink) untuk hemat bandwidth
         fields: 'nextPageToken, files(id, name, thumbnailLink)', 
-        // OPTIMASI 2: Set ke MAX (1000). Defaultnya cuma 100.
         pageSize: 1000, 
         pageToken: pageToken,
       });
 
       const files = response.data.files;
       if (files && files.length > 0) {
-        // Manipulasi link thumbnail agar resolusi tinggi
         const highResFiles = files.map(f => ({
             id: f.id,
             name: f.name,
-            // Trik Google Drive: ubah parameter ukuran gambar
             thumbnailLink: f.thumbnailLink ? f.thumbnailLink.replace(/=s\d+/, '=s800') : '' 
         }));
         allFiles.push(...highResFiles);
       }
-      
       pageToken = response.data.nextPageToken;
       loopCount++;
-      
-    } while (pageToken); // Ulangi jika masih ada halaman selanjutnya
+    } while (pageToken);
 
-    console.log(`Berhasil mengambil ${allFiles.length} foto.`);
+    console.log(`Success: ${allFiles.length} photos`);
     res.json(allFiles);
 
   } catch (error) {
-    console.error("API Error:", error);
-    res.status(500).json({ error: error.message });
+    // TANGKAP ERROR DAN KIRIM KE FRONTEND
+    console.error("API Crash:", error);
+    
+    // Cek error permission
+    if (error.message && error.message.includes('permissions')) {
+        return res.status(500).json({ error: "Bot email belum dijadikan Viewer di folder Drive ini." });
+    }
+
+    // Kirim pesan error asli biar ketahuan sebabnya
+    res.status(500).json({ error: `Server Error: ${error.message}` });
   }
 });
 
-// ... (Sisa kode export default app biarkan sama) ...
+app.get('/api', (req, res) => res.send("Aksara API Ready"));
+
+export default app;
