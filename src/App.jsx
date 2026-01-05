@@ -219,7 +219,7 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
                           type="text" 
                           value={clientName} 
                           onChange={(e) => setClientName(e.target.value)} 
-                          placeholder="Nama Klien (Cth: Romeo & Juliet)" 
+                          placeholder="Nama Klien (Cth: Joming)" 
                           className="input-field !pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
                         />
                     </div>
@@ -231,7 +231,7 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
                           type="text" 
                           value={folderUrl} 
                           onChange={(e) => setFolderUrl(e.target.value)} 
-                          placeholder="Link Google Drive Folder" 
+                          placeholder="Link Google Drive (shared)" 
                           className="input-field !pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
                         />
                     </div>
