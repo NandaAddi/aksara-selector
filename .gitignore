@@ -1,0 +1,12 @@
+# Dependency (File library yang berat, jangan diupload)
+node_modules
+dist
+build
+
+# File Rahasia (JANGAN PERNAH DIUPLOAD)
+credentials.json
+.env
+
+# System Files
+.DS_Store
+Thumbs.db
