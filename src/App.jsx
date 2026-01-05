@@ -141,7 +141,7 @@ const LoginPanel = ({ onLogin }) => {
 };
 
 /* ==================================================================================
-   2. ADMIN PANEL (RE-DESIGNED & ORGANIZED)
+   2. ADMIN PANEL (FIXED PADDING COLLISION)
    ================================================================================== */
 const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
   const [folderUrl, setFolderUrl] = useState('');
@@ -214,23 +214,25 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
                     
                     <div className="relative group">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" size={18} />
+                        {/* Added !pl-12 to force padding over global style */}
                         <input 
                           type="text" 
                           value={clientName} 
                           onChange={(e) => setClientName(e.target.value)} 
                           placeholder="Nama Klien (Cth: Romeo & Juliet)" 
-                          className="input-field pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
+                          className="input-field !pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
                         />
                     </div>
 
                     <div className="relative group">
                         <Folder className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-yellow-400 transition-colors" size={18} />
+                        {/* Added !pl-12 */}
                         <input 
                           type="text" 
                           value={folderUrl} 
                           onChange={(e) => setFolderUrl(e.target.value)} 
                           placeholder="Link Google Drive Folder" 
-                          className="input-field pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
+                          className="input-field !pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
                         />
                     </div>
                 </div>
@@ -241,22 +243,24 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="relative group">
                             <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" size={18} />
+                            {/* Added !pl-12 */}
                             <input 
                               type="number" 
                               value={limit} 
                               onChange={(e) => setLimit(e.target.value)} 
                               placeholder="Max Foto (Default: 10)" 
-                              className="input-field pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
+                              className="input-field !pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
                             />
                         </div>
                         <div className="relative group">
                             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-green-400 transition-colors" size={18} />
+                            {/* Added !pl-12 */}
                             <input 
                               type="text" 
                               value={photographerWa} 
                               onChange={(e) => setPhotographerWa(e.target.value)} 
                               placeholder="WhatsApp (62812...)" 
-                              className="input-field pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
+                              className="input-field !pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
                             />
                         </div>
                     </div>
