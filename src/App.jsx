@@ -19,35 +19,75 @@ const BG_IMAGES = [
 ];
 
 /* ==================================================================================
-   STYLES & ANIMATIONS
+   STYLES & ANIMATIONS (UPDATED FOR BEAUTY)
    ================================================================================== */
 const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Manrope:wght@300;400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Manrope:wght@300;400;500;600;800&display=swap');
     
+    :root {
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-bg: rgba(18, 18, 23, 0.65);
+      --glass-shine: rgba(255, 255, 255, 0.03);
+    }
+
+    body {
+      background-color: #0a0a0c;
+      color: #e5e5e5;
+    }
+
     .font-serif { font-family: 'Cormorant Garamond', serif; }
     .font-sans { font-family: 'Manrope', sans-serif; }
     
+    /* Enhanced Glassmorphism */
     .glass-card {
-      background: rgba(20, 20, 20, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 
+        0 20px 40px -10px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     }
 
-    .animate-fade-up { animation: fadeInUp 0.6s ease-out forwards; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .glass-card:hover {
+      border-color: rgba(255,255,255,0.15);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .animate-fade-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     
-    /* UTILS PENTING: Mencegah scroll saat lightbox aktif */
     body.lightbox-open { overflow: hidden !important; touch-action: none; position: fixed; width: 100%; }
     
-    .input-field { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.8rem 1rem; color: white; outline: none; transition: all; }
-    .input-field:focus { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
+    /* Input Fields beautification */
+    .input-field { 
+      width: 100%; 
+      background: rgba(0, 0, 0, 0.2); 
+      border: 1px solid rgba(255,255,255,0.08); 
+      border-radius: 0.75rem; 
+      padding: 0.9rem 1rem; 
+      color: white; 
+      outline: none; 
+      transition: all 0.3s ease; 
+      font-size: 0.95rem;
+    }
+    .input-field:focus { 
+      border-color: rgba(255,255,255,0.5); 
+      background: rgba(0,0,0,0.4); 
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
+    }
+    .input-field::placeholder { color: rgba(255,255,255,0.25); }
     
-    /* Hide scrollbar for copy box */
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Custom Selection Color */
+    ::selection {
+      background: rgba(250, 204, 21, 0.3);
+      color: #fff;
+    }
   `}</style>
 );
 
@@ -57,31 +97,31 @@ const GlobalStyles = () => (
 const BackgroundSlideshow = () => {
   const [index, setIndex] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => setIndex((prev) => (prev + 1) % BG_IMAGES.length), 5000);
+    const interval = setInterval(() => setIndex((prev) => (prev + 1) % BG_IMAGES.length), 6000);
     return () => clearInterval(interval);
   }, []);
   return (
-    <div className="fixed inset-0 bg-black -z-10 overflow-hidden">
+    <div className="fixed inset-0 bg-[#0a0a0c] -z-10 overflow-hidden">
       {BG_IMAGES.map((img, i) => (
-        <div key={i} className={`absolute inset-0 transition-opacity duration-[2000ms] ease-in-out ${i === index ? 'opacity-40' : 'opacity-0'}`}>
-          <img src={img} alt="bg" className="w-full h-full object-cover grayscale brightness-50 scale-105" />
+        <div key={i} className={`absolute inset-0 transition-all duration-[2500ms] ease-in-out ${i === index ? 'opacity-50 scale-105' : 'opacity-0 scale-100'}`}>
+          <img src={img} alt="bg" className="w-full h-full object-cover" />
         </div>
       ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-[#050505]/40" />
+      {/* Softened Gradient Overlay (Not Pitch Black) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/80 to-[#0a0a0c]/30 mix-blend-multiply" />
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
     </div>
   );
 };
 
-// --- PRELOADER (Ganti logo sesuai kebutuhan) ---
 const Preloader = () => (
-  <div className="fixed inset-0 z-[9999] bg-[#050505] flex items-center justify-center">
-    <div className="flex flex-col items-center animate-pulse">
-       <div className="w-20 h-20 border border-white/10 rounded-full flex items-center justify-center mb-4 relative">
-          <div className="absolute inset-0 border-t border-white rounded-full animate-spin"></div>
-          {/* Ganti dengan <img src="..." /> jika ingin logo gambar */}
-          <span className="font-serif text-3xl text-white italic">A</span>
+  <div className="fixed inset-0 z-[9999] bg-[#0a0a0c] flex items-center justify-center">
+    <div className="flex flex-col items-center">
+       <div className="w-24 h-24 border border-white/5 rounded-full flex items-center justify-center mb-6 relative">
+          <div className="absolute inset-0 border-t border-r border-white/80 rounded-full animate-spin"></div>
+          <span className="font-serif text-4xl text-white italic animate-pulse">A</span>
        </div>
-       <p className="text-white/50 text-[10px] uppercase tracking-[0.3em] font-sans">Loading Gallery...</p>
+       <p className="text-white/30 text-[10px] uppercase tracking-[0.4em] font-sans animate-fade-up">Loading Experience</p>
     </div>
   </div>
 );
@@ -119,21 +159,40 @@ const LoginPanel = ({ onLogin }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 font-sans relative">
       <div className="w-full max-w-sm relative z-10 animate-fade-up">
-        <div className="glass-card rounded-[2rem] p-8 relative overflow-hidden">
-          <div className="mb-6 text-center">
-            <div className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-[0_0_15px_rgba(255,255,255,0.2)]"><span className="font-serif text-2xl italic">A</span></div>
-            <h1 className="font-serif text-2xl text-white">Aksara Picture</h1>
-            <p className="text-white/40 text-[9px] uppercase tracking-[0.2em]">{isRegister ? 'Create Account' : 'Welcome Back'}</p>
+        {/* Glow Effect behind card */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-white/10 to-transparent rounded-[2.2rem] blur-xl opacity-50 pointer-events-none"></div>
+        
+        <div className="glass-card rounded-[2rem] p-8 md:p-10 relative overflow-hidden">
+          <div className="mb-8 text-center">
+            <div className="w-16 h-16 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(255,255,255,0.15)] ring-4 ring-white/10 transition-transform hover:scale-110 duration-500">
+                <span className="font-serif text-3xl italic">A</span>
+            </div>
+            <h1 className="font-serif text-3xl text-white mb-2 tracking-wide">Aksara Picture</h1>
+            <p className="text-white/30 text-[10px] uppercase tracking-[0.3em] font-medium">{isRegister ? 'Begin Journey' : 'Member Access'}</p>
           </div>
-          <form onSubmit={handleManualSubmit} className="space-y-3 mb-6">
+          
+          <form onSubmit={handleManualSubmit} className="space-y-4 mb-8">
             {isRegister && <input name="name" type="text" placeholder="Full Name" value={formData.name} onChange={handleChange} required className="input-field" />}
-            <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required className="input-field" />
+            <input name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required className="input-field" />
             <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required className="input-field" />
-            <button type="submit" disabled={isLoading} className="w-full bg-white hover:bg-gray-200 text-black py-3 rounded-xl font-bold text-xs uppercase tracking-wider mt-2 shadow-lg active:scale-95 transition-transform">{isLoading ? <Loader2 className="animate-spin mx-auto" size={16}/> : (isRegister ? 'Sign Up' : 'Sign In')}</button>
+            
+            <button type="submit" disabled={isLoading} className="w-full bg-white hover:bg-[#e0e0e0] text-black py-3.5 rounded-xl font-bold text-xs uppercase tracking-[0.15em] mt-4 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] active:scale-[0.98] transition-all duration-300">
+                {isLoading ? <Loader2 className="animate-spin mx-auto text-black" size={18}/> : (isRegister ? 'Create Account' : 'Sign In')}
+            </button>
           </form>
-          <div className="relative mb-5"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div><div className="relative flex justify-center"><span className="px-3 text-[9px] uppercase text-white/30 bg-black/20 backdrop-blur-md rounded">Or</span></div></div>
-          <button onClick={() => googleLogin()} disabled={isLoading} className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wide mb-4 transition-colors">Google Access</button>
-          <p className="text-white/40 text-xs text-center cursor-pointer hover:text-white transition-colors" onClick={() => setIsRegister(!isRegister)}>{isRegister ? "Have an account? Log In" : "New here? Register"}</p>
+
+          <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
+              <div className="relative flex justify-center"><span className="px-4 text-[10px] uppercase text-white/20 bg-[#15151a] backdrop-blur-md rounded-full tracking-wider">Or continue with</span></div>
+          </div>
+
+          <button onClick={() => googleLogin()} disabled={isLoading} className="w-full group bg-white/5 border border-white/10 hover:bg-white/10 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wide mb-6 transition-all duration-300 flex items-center justify-center gap-2 hover:border-white/20">
+             <span>Google Access</span>
+          </button>
+
+          <p className="text-white/30 text-xs text-center cursor-pointer hover:text-white transition-colors duration-300" onClick={() => setIsRegister(!isRegister)}>
+            {isRegister ? <span>Already a member? <span className="underline decoration-white/30 underline-offset-4">Log In</span></span> : <span>New here? <span className="underline decoration-white/30 underline-offset-4">Register</span></span>}
+          </p>
         </div>
       </div>
     </div>
@@ -141,7 +200,7 @@ const LoginPanel = ({ onLogin }) => {
 };
 
 /* ==================================================================================
-   2. ADMIN PANEL (FIXED PADDING COLLISION)
+   2. ADMIN PANEL
    ================================================================================== */
 const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
   const [folderUrl, setFolderUrl] = useState('');
@@ -166,101 +225,102 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen p-4 font-sans animate-fade-up flex items-center justify-center pb-20">
-      <div className="w-full max-w-2xl space-y-6">
+    <div className="min-h-screen p-4 md:p-8 font-sans animate-fade-up flex items-center justify-center pb-24">
+      <div className="w-full max-w-2xl space-y-8">
         
         {/* --- HEADER: PROFILE --- */}
-        <header className="glass-card p-5 rounded-2xl flex justify-between items-center border border-white/10 bg-white/5">
-          <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
+        <header className="glass-card p-5 rounded-2xl flex justify-between items-center group hover:bg-white/[0.02] transition-colors">
+          <div className="flex items-center gap-5">
+             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/10 shadow-lg group-hover:scale-105 transition-transform duration-500">
                 {user.picture ? (
                   <img src={user.picture} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="bg-gradient-to-br from-gray-700 to-black text-white h-full flex items-center justify-center font-bold text-lg">
+                  <div className="bg-gradient-to-br from-gray-800 to-black text-white h-full flex items-center justify-center font-bold text-lg">
                     {user.given_name?.charAt(0)}
                   </div>
                 )}
              </div>
              <div>
-               <p className="text-white/40 text-[10px] uppercase tracking-widest font-bold mb-0.5">Logged in as</p>
-               <h2 className="text-xl font-serif text-white">{user.given_name}</h2>
+               <p className="text-white/30 text-[9px] uppercase tracking-[0.2em] font-bold mb-1">Dashboard Access</p>
+               <h2 className="text-2xl font-serif text-white tracking-wide">{user.given_name}</h2>
              </div>
           </div>
           <button 
             onClick={onLogout} 
-            className="group flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-all active:scale-95 border border-red-500/20"
+            className="group/logout flex items-center gap-2 px-5 py-2.5 bg-red-500/5 hover:bg-red-500/10 text-red-400/70 hover:text-red-400 rounded-xl transition-all active:scale-95 border border-red-500/10 hover:border-red-500/30"
           >
-            <span className="text-xs font-bold hidden sm:block">LOGOUT</span>
-            <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-[10px] font-bold tracking-widest hidden sm:block">LOGOUT</span>
+            <LogOut size={16} className="group-hover/logout:-translate-x-1 transition-transform" />
           </button>
         </header>
 
         {/* --- MAIN FORM --- */}
-        <div className="glass-card p-6 md:p-8 rounded-3xl relative overflow-hidden">
+        <div className="glass-card p-8 md:p-10 rounded-[2rem] relative overflow-hidden ring-1 ring-white/5">
             {/* Decoration */}
-            <div className="absolute top-0 right-0 p-3 opacity-10 pointer-events-none">
-              <Aperture size={120} className="text-white" />
+            <div className="absolute -top-10 -right-10 p-10 opacity-[0.03] pointer-events-none rotate-12">
+              <Aperture size={200} className="text-white" />
             </div>
 
-            <div className="mb-8">
-              <h3 className="font-serif text-2xl text-white mb-1">Create Session</h3>
-              <p className="text-white/40 text-xs">Isi detail sesi foto untuk klien Anda.</p>
+            <div className="mb-10 relative">
+              <h3 className="font-serif text-3xl text-white mb-2">Session Configuration</h3>
+              <p className="text-white/40 text-xs tracking-wide font-light">Create a bespoke selection gallery for your client.</p>
+              <div className="w-12 h-0.5 bg-yellow-400/50 mt-4 rounded-full"></div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-6 relative z-10">
                 {/* Client Info Group */}
-                <div className="space-y-4">
-                    <label className="block text-xs font-bold text-white/60 uppercase tracking-wider ml-1">Informasi Utama</label>
+                <div className="space-y-5">
+                    <label className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400/50"></span> Primary Info
+                    </label>
                     
                     <div className="relative group">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" size={18} />
-                        {/* Added !pl-12 to force padding over global style */}
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors duration-300" size={18} />
                         <input 
                           type="text" 
                           value={clientName} 
                           onChange={(e) => setClientName(e.target.value)} 
-                          placeholder="Nama Klien (Cth: Joming)" 
-                          className="input-field !pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
+                          placeholder="Client Name (e.g. Sarah & James)" 
+                          className="input-field !pl-12 py-4 bg-black/20 focus:bg-black/40" 
                         />
                     </div>
 
                     <div className="relative group">
-                        <Folder className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-yellow-400 transition-colors" size={18} />
-                        {/* Added !pl-12 */}
+                        <Folder className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-yellow-400 transition-colors duration-300" size={18} />
                         <input 
                           type="text" 
                           value={folderUrl} 
                           onChange={(e) => setFolderUrl(e.target.value)} 
-                          placeholder="Link Google Drive (shared)" 
-                          className="input-field !pl-12 py-3.5 bg-black/20 focus:bg-black/40 border-white/10" 
+                          placeholder="Google Drive Folder URL (Shared)" 
+                          className="input-field !pl-12 py-4 bg-black/20 focus:bg-black/40" 
                         />
                     </div>
                 </div>
 
                 {/* Settings Group */}
-                <div className="space-y-4 pt-2">
-                    <label className="block text-xs font-bold text-white/60 uppercase tracking-wider ml-1">Pengaturan Batasan</label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-5 pt-4">
+                    <label className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/50"></span> Constraints
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="relative group">
-                            <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" size={18} />
-                            {/* Added !pl-12 */}
+                            <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors duration-300" size={18} />
                             <input 
                               type="number" 
                               value={limit} 
                               onChange={(e) => setLimit(e.target.value)} 
-                              placeholder="Max Foto (Default: 10)" 
-                              className="input-field !pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
+                              placeholder="Photo Limit" 
+                              className="input-field !pl-12 py-4 bg-black/20 focus:bg-black/40" 
                             />
                         </div>
                         <div className="relative group">
-                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-green-400 transition-colors" size={18} />
-                            {/* Added !pl-12 */}
+                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-green-400 transition-colors duration-300" size={18} />
                             <input 
                               type="text" 
                               value={photographerWa} 
                               onChange={(e) => setPhotographerWa(e.target.value)} 
-                              placeholder="WhatsApp (62812...)" 
-                              className="input-field !pl-12 bg-black/20 focus:bg-black/40 border-white/10" 
+                              placeholder="WhatsApp (628...)" 
+                              className="input-field !pl-12 py-4 bg-black/20 focus:bg-black/40" 
                             />
                         </div>
                     </div>
@@ -269,47 +329,47 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
 
             <button 
               onClick={handleGenerate} 
-              className="w-full bg-white text-black font-bold uppercase tracking-[0.2em] py-4 rounded-xl mt-8 hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+              className="group w-full bg-white hover:bg-gray-100 text-black font-bold uppercase tracking-[0.25em] text-xs py-5 rounded-xl mt-10 transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(255,255,255,0.25)]"
             >
-              <Sparkles size={18} /> Generate Link
+              <Sparkles size={16} className="text-yellow-600 group-hover:rotate-12 transition-transform" /> Generate Access Link
             </button>
         </div>
 
         {/* --- RESULT SECTION --- */}
         {generatedLink && (
-            <div className="glass-card p-1 rounded-2xl animate-fade-up border border-yellow-400/30 shadow-[0_0_30px_rgba(253,224,71,0.1)]">
-                <div className="bg-black/40 p-5 rounded-xl">
-                    <div className="flex items-center gap-2 mb-4 text-yellow-400">
-                        <LinkIcon size={16} />
-                        <span className="text-xs font-bold uppercase tracking-widest">Link Created Successfully</span>
+            <div className="glass-card p-1 rounded-2xl animate-fade-up border border-yellow-400/20 shadow-[0_10px_40px_rgba(253,224,71,0.05)]">
+                <div className="bg-[#0f0f12] p-6 rounded-xl">
+                    <div className="flex items-center gap-3 mb-5 text-yellow-400/90">
+                        <div className="p-2 bg-yellow-400/10 rounded-lg"><LinkIcon size={16} /></div>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Session Link Ready</span>
                     </div>
 
                     {/* Copy Box */}
-                    <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2 mb-4">
-                        <div className="flex-1 overflow-x-auto scrollbar-hide">
-                           <p className="text-white/70 text-sm font-mono whitespace-nowrap px-2">{generatedLink}</p>
+                    <div className="flex items-center gap-3 bg-black/40 border border-white/5 rounded-xl p-3 mb-6 group hover:border-white/10 transition-colors">
+                        <div className="flex-1 overflow-x-auto scrollbar-hide px-2">
+                           <p className="text-white/60 text-xs font-mono whitespace-nowrap group-hover:text-white/80 transition-colors">{generatedLink}</p>
                         </div>
                         <button 
                           onClick={copyToClipboard} 
-                          className={`p-2 rounded-md transition-all ${isCopied ? 'bg-green-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                          className={`p-3 rounded-lg transition-all duration-300 shadow-lg ${isCopied ? 'bg-green-500/20 text-green-400' : 'bg-white/5 text-white/70 hover:bg-white/15 hover:text-white'}`}
                         >
                            {isCopied ? <Check size={18} /> : <Copy size={18} />}
                         </button>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-4">
                         <button 
                           onClick={() => window.open(generatedLink, '_blank')} 
-                          className="flex items-center justify-center gap-2 p-3 rounded-lg border border-white/10 hover:bg-white/5 text-white/80 transition-colors text-xs uppercase font-bold tracking-wide"
+                          className="flex items-center justify-center gap-2 p-4 rounded-xl border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all text-[10px] uppercase font-bold tracking-[0.15em]"
                         >
-                           <ExternalLink size={14} /> Open Link
+                           <ExternalLink size={14} /> Open
                         </button>
                         <button 
                           onClick={() => onPreviewClient({ clientName, folderLink: folderUrl, photographerWa, limit })} 
-                          className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors text-xs uppercase font-bold tracking-wide"
+                          className="flex items-center justify-center gap-2 p-4 rounded-xl bg-white/10 hover:bg-white/15 text-white transition-all text-[10px] uppercase font-bold tracking-[0.15em] border border-white/5 hover:border-white/20"
                         >
-                           Preview Gallery <ChevronRight size={14} />
+                           Preview <ChevronRight size={14} />
                         </button>
                     </div>
                 </div>
@@ -321,7 +381,7 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
 };
 
 /* ==================================================================================
-   3. CLIENT GALLERY (FINAL FIX: CALCULATED HEIGHT & ABSOLUTE CENTERING)
+   3. CLIENT GALLERY (BEAUTIFIED)
    ================================================================================== */
 const ClientGallery = ({ config, onCloseSimulation }) => {
   const [photos, setPhotos] = useState([]);
@@ -358,8 +418,8 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
             const baseUrl = p.thumbnailLink || '';
             return {
                 ...p,
-                gridUrl: baseUrl.replace(/=s\d+/, '=s300-c'), 
-                fullUrl: baseUrl.replace(/=s\d+/, '=s1200') 
+                gridUrl: baseUrl.replace(/=s\d+/, '=s400-c'), 
+                fullUrl: baseUrl.replace(/=s\d+/, '=s1600') 
             };
         });
         setPhotos(optimizedPhotos);
@@ -389,39 +449,49 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
   const prevImage = (e) => { if(e) e.stopPropagation(); setLightboxIndex((prev) => (prev - 1 + photos.length) % photos.length); };
   
   return (
-    <div className="min-h-screen text-white pb-20">
+    <div className="min-h-screen text-white pb-24 bg-[#0a0a0c]">
       {/* Navbar Grid */}
-      <nav className="fixed top-0 w-full z-40 glass-card border-b border-white/5 h-16 flex items-center justify-between px-4">
+      <nav className="fixed top-0 w-full z-40 glass-card h-20 flex items-center justify-between px-6 md:px-10 border-b border-white/5 transition-all">
           <div className="flex flex-col">
-              <h1 className="font-serif text-lg leading-tight truncate max-w-[150px]">{config.clientName}</h1>
-              <p className="text-[9px] text-white/50 uppercase tracking-widest">Selection</p>
+              <h1 className="font-serif text-2xl leading-none tracking-wide text-white">{config.clientName}</h1>
+              <p className="text-[9px] text-white/40 uppercase tracking-[0.3em] mt-1 font-medium">Gallery Selection</p>
           </div>
-          <div className="flex items-center gap-3">
-              <div className="bg-white/10 px-3 py-1 rounded-full text-xs font-mono text-yellow-400 border border-white/10">{selected.length}/{config.limit || '∞'}</div>
-              <button onClick={sendToWa} className="bg-white text-black px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-gray-200 active:scale-95 transition-transform">Send</button>
-              {onCloseSimulation && <button onClick={onCloseSimulation} className="p-2 bg-red-500/10 text-red-500 rounded-lg"><X size={16}/></button>}
+          <div className="flex items-center gap-4">
+              <div className="bg-white/5 px-4 py-1.5 rounded-full text-xs font-mono text-yellow-400 border border-yellow-400/20 shadow-[0_0_15px_rgba(250,204,21,0.1)]">
+                {selected.length} <span className="text-white/30 mx-1">/</span> {config.limit || '∞'}
+              </div>
+              <button onClick={sendToWa} className="bg-white hover:bg-gray-200 text-black px-6 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+                Finalize
+              </button>
+              {onCloseSimulation && <button onClick={onCloseSimulation} className="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-red-500/10"><X size={18}/></button>}
           </div>
       </nav>
 
       {/* Grid Content */}
-      <main className="pt-20 px-2 max-w-7xl mx-auto animate-fade-up">
+      <main className="pt-28 px-4 md:px-10 max-w-[1600px] mx-auto animate-fade-up">
         {loading ? (
             <div className="flex flex-col items-center justify-center py-40">
-                <Loader2 className="animate-spin mb-3 text-white/50" size={28} />
-                <p className="text-white/40 text-[10px] animate-pulse uppercase tracking-widest">Loading...</p>
+                <Loader2 className="animate-spin mb-4 text-white/30" size={32} />
+                <p className="text-white/30 text-[10px] animate-pulse uppercase tracking-[0.3em]">Curating Images...</p>
             </div>
         ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
                 {photos.map((photo, index) => {
                     const isSelected = selected.find(p => p.id === photo.id);
                     return (
                         <div key={photo.id} onClick={() => setLightboxIndex(index)} 
-                             className={`relative aspect-square group cursor-pointer bg-white/5 rounded-lg overflow-hidden transition-all duration-300 ${isSelected ? 'ring-2 ring-yellow-400' : ''}`}>
-                            <img src={photo.gridUrl} alt="Thumb" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                            <button onClick={(e) => toggleSelect(photo, e)} className={`absolute top-2 right-2 p-1.5 rounded-full transition-all active:scale-90 ${isSelected ? 'bg-yellow-400 text-black shadow-lg' : 'bg-black/30 text-white backdrop-blur-sm'}`}>
-                                {isSelected ? <Check size={12} strokeWidth={4} /> : <div className="w-3 h-3 border border-white/80 rounded-full" />}
+                             className={`relative aspect-[3/4] group cursor-pointer bg-white/5 rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] ${isSelected ? 'ring-2 ring-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.2)]' : ''}`}>
+                            <img src={photo.gridUrl} alt="Thumb" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            
+                            <button onClick={(e) => toggleSelect(photo, e)} className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-300 active:scale-90 z-10 ${isSelected ? 'bg-yellow-400 text-black shadow-[0_0_15px_rgba(250,204,21,0.5)] scale-110' : 'bg-black/40 text-white/50 backdrop-blur-md hover:bg-white hover:text-black border border-white/10'}`}>
+                                {isSelected ? <Check size={14} strokeWidth={4} /> : <div className="w-3.5 h-3.5 border border-current rounded-full" />}
                             </button>
+                            
+                            {/* Hover Info */}
+                            <div className="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+                                <p className="text-[10px] text-white/80 font-mono truncate">{photo.name}</p>
+                            </div>
                         </div>
                     );
                 })}
@@ -430,33 +500,26 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
       </main>
 
       {/* --- LIGHTBOX (ABSOLUTE POSITIONING SYSTEM) --- */}
-      {/* Struktur ini tidak menggunakan Flexbox untuk layout utama, tapi Absolute Positioning */}
-      {/* Ini menjamin posisi elemen TIDAK akan bergeser karena perhitungan browser HP yang salah */}
-      
       {lightboxIndex !== null && photos[lightboxIndex] && (
         <div 
-          className="fixed inset-0 z-[9999] bg-[#000000] w-full h-[100dvh]" // Background Hitam Pekat
+          className="fixed inset-0 z-[9999] bg-[#050505] w-full h-[100dvh] animate-in fade-in duration-300" 
           onClick={() => setLightboxIndex(null)}
         >
             
             {/* 1. HEADER (Top Fixed) */}
-            <div className="absolute top-0 left-0 w-full h-16 flex items-center justify-between px-4 bg-gradient-to-b from-black/90 to-transparent z-[10010]">
-                <span className="text-white/70 text-xs font-mono truncate max-w-[200px] drop-shadow-md">{photos[lightboxIndex].name}</span>
-                <button onClick={() => setLightboxIndex(null)} className="p-2 bg-white/10 rounded-full text-white backdrop-blur-sm"><X size={20}/></button>
+            <div className="absolute top-0 left-0 w-full h-20 flex items-center justify-between px-6 bg-gradient-to-b from-black/80 to-transparent z-[10010] pointer-events-none">
+                <span className="text-white/60 text-xs font-mono tracking-wider backdrop-blur-md px-3 py-1 rounded-full bg-white/5 border border-white/5 pointer-events-auto">{photos[lightboxIndex].name}</span>
+                <button onClick={() => setLightboxIndex(null)} className="pointer-events-auto p-3 bg-white/5 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-colors border border-white/5 group"><X size={20} className="group-hover:scale-90 transition-transform"/></button>
             </div>
 
             {/* 2. IMAGE CONTAINER (Absolute Center) */}
-            {/* Kita gunakan inset-0 untuk memenuhi layar, tapi beri padding atas/bawah agar tidak ketabrak Header/Footer */}
-            <div className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none">
-                
-                {/* GAMBAR UTAMA */}
-                {/* Max height dihitung: 100vh - 150px (ruang header+footer). Ini menjamin gambar tidak pernah ketutup. */}
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none p-4">
                 <img 
                     src={photos[lightboxIndex].fullUrl} 
-                    className="object-contain pointer-events-auto shadow-2xl" 
+                    className="object-contain pointer-events-auto shadow-[0_0_100px_rgba(0,0,0,0.8)] drop-shadow-2xl transition-transform duration-300" 
                     alt="Full View"
                     style={{ 
-                        maxHeight: 'calc(100dvh - 160px)', // KUNCI UTAMA DISINI
+                        maxHeight: 'calc(100dvh - 180px)', 
                         maxWidth: '100%',
                     }}
                     onClick={(e) => e.stopPropagation()} 
@@ -464,29 +527,29 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
             </div>
 
             {/* 3. NAVIGATION ARROWS (Absolute Center Vertical) */}
-            <div className="absolute inset-0 flex items-center justify-between px-2 w-full h-full pointer-events-none z-[10005]">
+            <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8 w-full h-full pointer-events-none z-[10005]">
                 <button 
                     onClick={prevImage} 
-                    className="pointer-events-auto p-4 md:p-5 bg-black/30 hover:bg-black/60 rounded-full text-white/80 hover:text-white backdrop-blur-sm transition-all"
+                    className="pointer-events-auto p-4 bg-black/20 hover:bg-black/50 rounded-full text-white/50 hover:text-white backdrop-blur-sm transition-all border border-white/5 hover:border-white/20 hover:scale-110"
                 >
-                    <ChevronLeft size={32} />
+                    <ChevronLeft size={32} strokeWidth={1.5} />
                 </button>
                 <button 
                     onClick={nextImage} 
-                    className="pointer-events-auto p-4 md:p-5 bg-black/30 hover:bg-black/60 rounded-full text-white/80 hover:text-white backdrop-blur-sm transition-all"
+                    className="pointer-events-auto p-4 bg-black/20 hover:bg-black/50 rounded-full text-white/50 hover:text-white backdrop-blur-sm transition-all border border-white/5 hover:border-white/20 hover:scale-110"
                 >
-                    <ChevronRight size={32} />
+                    <ChevronRight size={32} strokeWidth={1.5} />
                 </button>
             </div>
 
             {/* 4. FOOTER ACTION (Bottom Fixed) */}
             <div 
-                className="absolute bottom-0 left-0 w-full h-24 flex items-center justify-center bg-gradient-to-t from-black via-black/90 to-transparent z-[10010]"
-                onClick={(e) => e.stopPropagation()} // Supaya klik area footer tidak menutup lightbox
+                className="absolute bottom-0 left-0 w-full h-32 flex items-center justify-center bg-gradient-to-t from-black/90 via-black/60 to-transparent z-[10010] pointer-events-none"
+                onClick={(e) => e.stopPropagation()} 
             >
                  <button onClick={(e) => toggleSelect(photos[lightboxIndex], e)}
-                    className={`flex items-center gap-2 px-10 py-3.5 rounded-full font-bold transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] active:scale-95 ${selected.find(p => p.id === photos[lightboxIndex].id) ? 'bg-yellow-400 text-black' : 'bg-white/20 text-white border border-white/20 backdrop-blur-md'}`}>
-                    {selected.find(p => p.id === photos[lightboxIndex].id) ? <><Check size={18} strokeWidth={3} /> Selected</> : 'Select Photo'}
+                    className={`pointer-events-auto flex items-center gap-3 px-12 py-4 rounded-full font-bold text-xs uppercase tracking-[0.2em] transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 ${selected.find(p => p.id === photos[lightboxIndex].id) ? 'bg-yellow-400 text-black shadow-[0_0_30px_rgba(250,204,21,0.3)]' : 'bg-white/10 text-white border border-white/20 backdrop-blur-xl hover:bg-white hover:text-black'}`}>
+                    {selected.find(p => p.id === photos[lightboxIndex].id) ? <><Check size={16} strokeWidth={4} /> Selected</> : 'Select Photo'}
                 </button>
             </div>
 
@@ -505,7 +568,7 @@ export default function App() {
   const [clientConfig, setClientConfig] = useState(null); 
   const [initialLoad, setInitialLoad] = useState(true);
 
-  useEffect(() => { const t = setTimeout(() => setInitialLoad(false), 2000); return () => clearTimeout(t); }, []);
+  useEffect(() => { const t = setTimeout(() => setInitialLoad(false), 2500); return () => clearTimeout(t); }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
