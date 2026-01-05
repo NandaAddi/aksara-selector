@@ -41,7 +41,7 @@ const GlobalStyles = () => (
     .animate-fade-up { animation: fadeInUp 0.6s ease-out forwards; }
     .animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
     
-    /* Utility agar Lightbox Fullscreen & Tidak Scroll */
+    /* Utility */
     .lightbox-open { overflow: hidden !important; height: 100vh !important; touch-action: none; }
     
     /* Input Style */
@@ -71,14 +71,26 @@ const BackgroundSlideshow = () => {
   );
 };
 
+// --- PRELOADER DENGAN LOGO ---
+// Ganti src={logoImage} jika pakai import file, atau string URL jika pakai link
 const Preloader = () => (
   <div className="fixed inset-0 z-[999] bg-[#050505] flex items-center justify-center">
     <div className="flex flex-col items-center animate-pulse">
-       <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mb-4 relative">
+       {/* Container Lingkaran Loading */}
+       <div className="w-20 h-20 border border-white/10 rounded-full flex items-center justify-center mb-4 relative">
+          
+          {/* Garis Loading Berputar */}
           <div className="absolute inset-0 border-t border-white rounded-full animate-spin"></div>
-          <span className="font-serif text-2xl text-white italic">A</span>
+          
+          <img 
+            src="https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/src/icon.png" 
+            alt="Logo" 
+            className="w-10 h-10 object-contain" 
+          />
+          {/* --------------------------------------- */}
+
        </div>
-       <p className="text-white/50 text-[10px] uppercase tracking-[0.3em] font-sans">Loading Gallery...</p>
+       <p className="text-white/50 text-[10px] uppercase tracking-[0.3em] font-sans">Loading...</p>
     </div>
   </div>
 );
@@ -208,7 +220,7 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
 };
 
 /* ==================================================================================
-   3. CLIENT GALLERY (FIXED FULL RESPONSIVE)
+   3. CLIENT GALLERY (FIXED MOBILE LAYOUT & NAV BUTTONS)
    ================================================================================== */
 const ClientGallery = ({ config, onCloseSimulation }) => {
   const [photos, setPhotos] = useState([]);
@@ -216,14 +228,14 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
   const [selected, setSelected] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   
-  // LOCK SCROLL saat Lightbox
+  // 1. KUNCI SCROLL BODY KETIKA LIGHTBOX BUKA
   useEffect(() => {
     if (lightboxIndex !== null) document.body.classList.add('lightbox-open');
     else document.body.classList.remove('lightbox-open');
     return () => document.body.classList.remove('lightbox-open');
   }, [lightboxIndex]);
 
-  // Keyboard Nav
+  // 2. NAVIGASI KEYBOARD
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (lightboxIndex === null) return;
@@ -235,22 +247,18 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightboxIndex]);
 
-  // FETCH & PREPARE URLS
+  // 3. FETCH & OPTIMASI URL
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
         setLoading(true);
         const res = await axios.post('/api/photos', { folderUrl: config.folderLink });
-        
-        // KITA SIAPKAN URL DISINI SUPAYA TIDAK ERROR SAAT DI-RENDER
         const optimizedPhotos = res.data.map(p => {
             const baseUrl = p.thumbnailLink || '';
             return {
                 ...p,
-                // Grid: Kecil & Crop (Kotak)
-                gridUrl: baseUrl.replace(/=s\d+/, '=s300-c'),
-                // Lightbox: HD (1200px) tapi tidak Original (agar cepat)
-                fullUrl: baseUrl.replace(/=s\d+/, '=s1200') 
+                gridUrl: baseUrl.replace(/=s\d+/, '=s300-c'), // Kecil & Kotak untuk Grid
+                fullUrl: baseUrl.replace(/=s\d+/, '=s1200') // HD Ringan untuk Lightbox
             };
         });
         setPhotos(optimizedPhotos);
@@ -324,38 +332,52 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
         )}
       </main>
 
-      {/* --- LIGHTBOX FIX (Z-INDEX 9999 + FLEXBOX) --- */}
+      {/* --- LIGHTBOX (PERBAIKAN TOTAL MOBILE LAYOUT) --- */}
       {lightboxIndex !== null && photos[lightboxIndex] && (
-        <div className="fixed inset-0 z-[9999] bg-black flex flex-col animate-scale-in">
+        <div 
+          className="fixed inset-0 z-[9999] bg-black flex flex-col h-[100dvh] w-full"
+          onClick={() => setLightboxIndex(null)} // Klik background untuk close
+        >
             
-            {/* 1. Header Lightbox (Top) */}
-            <div className="h-14 flex items-center justify-between px-4 bg-gradient-to-b from-black/80 to-transparent shrink-0 z-50">
-                <span className="text-white/70 text-xs font-mono">{photos[lightboxIndex].name}</span>
-                <button onClick={() => setLightboxIndex(null)} className="p-2 bg-white/10 rounded-full text-white"><X size={20}/></button>
+            {/* 1. Header (Fixed Height, Don't Shrink) */}
+            <div className="h-16 flex-none flex items-center justify-between px-4 bg-black/50 backdrop-blur-sm z-50">
+                <span className="text-white/70 text-xs font-mono truncate max-w-[200px]">{photos[lightboxIndex].name}</span>
+                <button onClick={() => setLightboxIndex(null)} className="p-3 bg-white/10 rounded-full text-white active:bg-white/20"><X size={20}/></button>
             </div>
 
-            {/* 2. Main Image (Middle - Flex Grow) */}
-            <div className="flex-1 relative flex items-center justify-center overflow-hidden bg-black" onClick={() => setLightboxIndex(null)}>
+            {/* 2. Main Image Area (Flex-1 fills remaining space) */}
+            <div className="flex-1 relative w-full h-full flex items-center justify-center overflow-hidden bg-black">
                 
+                {/* Tombol Navigasi (ABSOLUTE POSITIONED RELATIVE TO SCREEN, NOT IMAGE) */}
+                {/* Layer z-50 agar di atas gambar. Padding p-4 agar area sentuh besar. */}
+                <button 
+                    onClick={prevImage} 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 p-4 md:p-6 text-white/80 hover:text-white z-50 outline-none" 
+                    style={{touchAction: 'manipulation'}} // Optimasi touch
+                >
+                    <ChevronLeft size={40} className="drop-shadow-lg filter bg-black/20 rounded-full" />
+                </button>
+
+                <button 
+                    onClick={nextImage} 
+                    className="absolute right-0 top-1/2 -translate-y-1/2 p-4 md:p-6 text-white/80 hover:text-white z-50 outline-none"
+                    style={{touchAction: 'manipulation'}}
+                >
+                    <ChevronRight size={40} className="drop-shadow-lg filter bg-black/20 rounded-full" />
+                </button>
+
                 {/* Gambar (Responsif Penuh) */}
                 <img 
                     src={photos[lightboxIndex].fullUrl} 
-                    className="max-w-full max-h-full object-contain p-2 md:p-6 transition-opacity duration-300"
+                    className="max-w-full max-h-full object-contain pointer-events-none select-none" // pointer-events-none supaya klik gambar tembus ke background (opsional) atau matikan drag
                     alt="Full View"
-                    onClick={(e) => e.stopPropagation()} /* Klik gambar tidak close */
+                    style={{ maxHeight: '100%', maxWidth: '100%' }}
+                    onClick={(e) => e.stopPropagation()} // Supaya kalau klik gambar gak close (opsional, kalau mau close pas klik gambar hapus baris ini)
                 />
-                
-                {/* Tombol Navigasi (Overlay di Kiri Kanan) */}
-                <button onClick={prevImage} className="absolute left-2 p-4 text-white/70 hover:text-white bg-black/20 hover:bg-black/50 rounded-full z-50" onClick={(e) => e.stopPropagation()}>
-                    <ChevronLeft size={32} />
-                </button>
-                <button onClick={nextImage} className="absolute right-2 p-4 text-white/70 hover:text-white bg-black/20 hover:bg-black/50 rounded-full z-50" onClick={(e) => e.stopPropagation()}>
-                    <ChevronRight size={32} />
-                </button>
             </div>
 
-            {/* 3. Footer Action (Bottom) */}
-            <div className="h-20 flex items-center justify-center shrink-0 bg-gradient-to-t from-black/90 to-transparent z-50">
+            {/* 3. Footer Action (Fixed Height, Don't Shrink) */}
+            <div className="h-24 flex-none flex items-center justify-center bg-gradient-to-t from-black via-black/80 to-transparent z-50 pb-4" onClick={(e) => e.stopPropagation()}>
                  <button onClick={(e) => toggleSelect(photos[lightboxIndex], e)}
                     className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold transition-all shadow-lg active:scale-95 ${selected.find(p => p.id === photos[lightboxIndex].id) ? 'bg-yellow-400 text-black' : 'bg-white/20 text-white border border-white/20 backdrop-blur-md'}`}>
                     {selected.find(p => p.id === photos[lightboxIndex].id) ? <><Check size={18} strokeWidth={3} /> Selected</> : 'Select Photo'}
