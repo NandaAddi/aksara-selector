@@ -12,10 +12,9 @@ import axios from 'axios';
 const GOOGLE_CLIENT_ID = "963212157034-pqg657cicgnmtikm59v04rdi46fo1cqc.apps.googleusercontent.com"; 
 
 const BG_IMAGES = [
-  "https://images.unsplash.com/photo-1519741497674-611481863552?q=60&w=1000&auto=format&fit=crop", 
-  "https://images.unsplash.com/photo-1511285560982-1356c11d4606?q=60&w=1000&auto=format&fit=crop", 
-  "https://images.unsplash.com/photo-1472653431158-6364773b2a56?q=60&w=1000&auto=format&fit=crop", 
-  "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=60&w=1000&auto=format&fit=crop"  
+  "https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/4.jpg", // Wedding/Love
+  "https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/5.jpg", // Moody Black White
+  "https://raw.githubusercontent.com/NandaAddi/aksara-selector/refs/heads/main/6.jpg", // Nature/Light
 ];
 
 /* ==================================================================================
@@ -39,8 +38,8 @@ const GlobalStyles = () => (
     .animate-fade-up { animation: fadeInUp 0.6s ease-out forwards; }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     
-    /* UTILS: Mencegah scroll saat lightbox aktif */
-    .lightbox-open { overflow: hidden !important; height: 100vh !important; touch-action: none; }
+    /* UTILS PENTING: Mencegah scroll saat lightbox aktif */
+    body.lightbox-open { overflow: hidden !important; touch-action: none; position: fixed; width: 100%; }
     
     .input-field { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.8rem 1rem; color: white; outline: none; transition: all; }
     .input-field:focus { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
@@ -68,12 +67,13 @@ const BackgroundSlideshow = () => {
   );
 };
 
+// --- PRELOADER (Ganti logo sesuai kebutuhan) ---
 const Preloader = () => (
-  <div className="fixed inset-0 z-[999] bg-[#050505] flex items-center justify-center">
+  <div className="fixed inset-0 z-[9999] bg-[#050505] flex items-center justify-center">
     <div className="flex flex-col items-center animate-pulse">
        <div className="w-20 h-20 border border-white/10 rounded-full flex items-center justify-center mb-4 relative">
           <div className="absolute inset-0 border-t border-white rounded-full animate-spin"></div>
-          {/* GANTI LOGO ANDA DISINI (img src="...") atau biarkan text A */}
+          {/* Ganti dengan <img src="..." /> jika ingin logo gambar */}
           <span className="font-serif text-3xl text-white italic">A</span>
        </div>
        <p className="text-white/50 text-[10px] uppercase tracking-[0.3em] font-sans">Loading Gallery...</p>
@@ -192,7 +192,7 @@ const AdminPanel = ({ user, onPreviewClient, onLogout }) => {
 };
 
 /* ==================================================================================
-   3. CLIENT GALLERY (FIXED: IMAGE CENTERING & MOBILE HEIGHT)
+   3. CLIENT GALLERY (FINAL FIX: CALCULATED HEIGHT & ABSOLUTE CENTERING)
    ================================================================================== */
 const ClientGallery = ({ config, onCloseSimulation }) => {
   const [photos, setPhotos] = useState([]);
@@ -200,14 +200,14 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
   const [selected, setSelected] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   
-  // LOCK SCROLL
+  // 1. HARD LOCK SCROLL BODY
   useEffect(() => {
     if (lightboxIndex !== null) document.body.classList.add('lightbox-open');
     else document.body.classList.remove('lightbox-open');
     return () => document.body.classList.remove('lightbox-open');
   }, [lightboxIndex]);
 
-  // KEYBOARD NAV
+  // 2. KEYBOARD NAV
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (lightboxIndex === null) return;
@@ -219,7 +219,7 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightboxIndex]);
 
-  // FETCH
+  // 3. FETCH
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
@@ -261,7 +261,7 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
   
   return (
     <div className="min-h-screen text-white pb-20">
-      {/* Navbar */}
+      {/* Navbar Grid */}
       <nav className="fixed top-0 w-full z-40 glass-card border-b border-white/5 h-16 flex items-center justify-between px-4">
           <div className="flex flex-col">
               <h1 className="font-serif text-lg leading-tight truncate max-w-[150px]">{config.clientName}</h1>
@@ -274,7 +274,7 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
           </div>
       </nav>
 
-      {/* Grid */}
+      {/* Grid Content */}
       <main className="pt-20 px-2 max-w-7xl mx-auto animate-fade-up">
         {loading ? (
             <div className="flex flex-col items-center justify-center py-40">
@@ -300,46 +300,63 @@ const ClientGallery = ({ config, onCloseSimulation }) => {
         )}
       </main>
 
-      {/* --- LIGHTBOX SYSTEM (PERBAIKAN TOTAL) --- */}
+      {/* --- LIGHTBOX (ABSOLUTE POSITIONING SYSTEM) --- */}
+      {/* Struktur ini tidak menggunakan Flexbox untuk layout utama, tapi Absolute Positioning */}
+      {/* Ini menjamin posisi elemen TIDAK akan bergeser karena perhitungan browser HP yang salah */}
+      
       {lightboxIndex !== null && photos[lightboxIndex] && (
         <div 
-          className="fixed inset-0 z-[9999] bg-black flex flex-col w-full h-[100dvh]" /* 100dvh PENTING untuk Mobile */
+          className="fixed inset-0 z-[9999] bg-[#000000] w-full h-[100dvh]" // Background Hitam Pekat
           onClick={() => setLightboxIndex(null)}
         >
             
-            {/* Header (Fixed) */}
-            <div className="h-16 flex-none flex items-center justify-between px-4 bg-black/50 backdrop-blur-sm z-50">
-                <span className="text-white/70 text-xs font-mono truncate max-w-[200px]">{photos[lightboxIndex].name}</span>
-                <button onClick={() => setLightboxIndex(null)} className="p-3 bg-white/10 rounded-full text-white active:bg-white/20"><X size={20}/></button>
+            {/* 1. HEADER (Top Fixed) */}
+            <div className="absolute top-0 left-0 w-full h-16 flex items-center justify-between px-4 bg-gradient-to-b from-black/90 to-transparent z-[10010]">
+                <span className="text-white/70 text-xs font-mono truncate max-w-[200px] drop-shadow-md">{photos[lightboxIndex].name}</span>
+                <button onClick={() => setLightboxIndex(null)} className="p-2 bg-white/10 rounded-full text-white backdrop-blur-sm"><X size={20}/></button>
             </div>
 
-            {/* AREA GAMBAR UTAMA (CENTERING SYSTEM) */}
-            {/* flex-1 akan mengambil semua sisa ruang antara header dan footer */}
-            <div className="flex-1 w-full relative flex items-center justify-center overflow-hidden bg-black" onClick={(e) => e.stopPropagation()}>
+            {/* 2. IMAGE CONTAINER (Absolute Center) */}
+            {/* Kita gunakan inset-0 untuk memenuhi layar, tapi beri padding atas/bawah agar tidak ketabrak Header/Footer */}
+            <div className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none">
                 
-                {/* Tombol Kiri */}
-                <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 p-4 text-white/80 hover:text-white bg-black/20 hover:bg-black/50 rounded-full z-[60] outline-none touch-manipulation">
-                    <ChevronLeft size={36} />
-                </button>
-
-                {/* Tombol Kanan */}
-                <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 p-4 text-white/80 hover:text-white bg-black/20 hover:bg-black/50 rounded-full z-[60] outline-none touch-manipulation">
-                    <ChevronRight size={36} />
-                </button>
-
-                {/* GAMBAR */}
-                {/* max-h-full dan object-contain memastikan gambar tidak pernah 'keluar' atau terpotong */}
+                {/* GAMBAR UTAMA */}
+                {/* Max height dihitung: 100vh - 150px (ruang header+footer). Ini menjamin gambar tidak pernah ketutup. */}
                 <img 
                     src={photos[lightboxIndex].fullUrl} 
-                    className="max-w-full max-h-full object-contain pointer-events-none select-none" 
+                    className="object-contain pointer-events-auto shadow-2xl" 
                     alt="Full View"
+                    style={{ 
+                        maxHeight: 'calc(100dvh - 160px)', // KUNCI UTAMA DISINI
+                        maxWidth: '100%',
+                    }}
+                    onClick={(e) => e.stopPropagation()} 
                 />
             </div>
 
-            {/* Footer Action (Fixed) */}
-            <div className="h-24 flex-none flex items-center justify-center bg-gradient-to-t from-black via-black/80 to-transparent z-50 pb-6" onClick={(e) => e.stopPropagation()}>
+            {/* 3. NAVIGATION ARROWS (Absolute Center Vertical) */}
+            <div className="absolute inset-0 flex items-center justify-between px-2 w-full h-full pointer-events-none z-[10005]">
+                <button 
+                    onClick={prevImage} 
+                    className="pointer-events-auto p-4 md:p-5 bg-black/30 hover:bg-black/60 rounded-full text-white/80 hover:text-white backdrop-blur-sm transition-all"
+                >
+                    <ChevronLeft size={32} />
+                </button>
+                <button 
+                    onClick={nextImage} 
+                    className="pointer-events-auto p-4 md:p-5 bg-black/30 hover:bg-black/60 rounded-full text-white/80 hover:text-white backdrop-blur-sm transition-all"
+                >
+                    <ChevronRight size={32} />
+                </button>
+            </div>
+
+            {/* 4. FOOTER ACTION (Bottom Fixed) */}
+            <div 
+                className="absolute bottom-0 left-0 w-full h-24 flex items-center justify-center bg-gradient-to-t from-black via-black/90 to-transparent z-[10010]"
+                onClick={(e) => e.stopPropagation()} // Supaya klik area footer tidak menutup lightbox
+            >
                  <button onClick={(e) => toggleSelect(photos[lightboxIndex], e)}
-                    className={`flex items-center gap-2 px-8 py-3.5 rounded-full font-bold transition-all shadow-lg active:scale-95 ${selected.find(p => p.id === photos[lightboxIndex].id) ? 'bg-yellow-400 text-black' : 'bg-white/20 text-white border border-white/20 backdrop-blur-md'}`}>
+                    className={`flex items-center gap-2 px-10 py-3.5 rounded-full font-bold transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] active:scale-95 ${selected.find(p => p.id === photos[lightboxIndex].id) ? 'bg-yellow-400 text-black' : 'bg-white/20 text-white border border-white/20 backdrop-blur-md'}`}>
                     {selected.find(p => p.id === photos[lightboxIndex].id) ? <><Check size={18} strokeWidth={3} /> Selected</> : 'Select Photo'}
                 </button>
             </div>
